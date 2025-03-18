@@ -93,11 +93,11 @@ public class WorldModel {
 		} else if (exercise == ExerciseEnum.EX_1_3_Colors_linear) {
 			Vector3f c1 = new Vector3f(1f,0,0); 
 			Vector3f c2 = new Vector3f(0,1f,0); 
-			Vector3f c = c1.mul((float)(imageWidth-1-x)/(imageWidth-1)).add(c2.mul((float)x/(imageWidth-1))); 
-			return c;			
+			return c1.mul((float)(imageWidth-1-x)/(imageWidth-1)).add(c2.mul((float)x/(imageWidth-1)));		
 		} else {
-
-			return new Vector3f(0);			
+			Vector3f pixelDirection = calcPixelDirection(x, y, imageWidth, imageHeight, model.fovXdegree);
+			Vector3f rayTrace = rayTracing(new Vector3f(), pixelDirection, model, skyBoxImageSphereTexture, 0);
+			return rayTrace;		
 		}
 	}
 
@@ -110,10 +110,8 @@ public class WorldModel {
 	 * @return The calculated color for the pixel based on ray tracing and lighting effects. */	
 	private static Vector3f rayTracing(Vector3f incidentRayOrigin, Vector3f incidentRayDirection, Model model,
 			SphereTexture skyBoxImageSphereTexture, int depthLevel) {
-
-		Vector3f returnedColor = new Vector3f();
 		
-		return returnedColor;
+		return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
 	}
 
 	
@@ -124,9 +122,14 @@ public class WorldModel {
 	 * @param imageHeight The height of the image.
 	 * @param fovXdegree The horizontal field of view in degrees.
 	 * @return The normalized direction vector of the ray for the given pixel. */	
-	static Vector3f calcPixelDirection(int x, int y, int imageWidth, int imageHeight, float fovXdegree) {
-
-		return new Vector3f(0);
+	static Vector3f calcPixelDirection(int x, int y, int imageWidth, int imageHeight, float fovXdegree) {	
+		double fovXradian = Math.toRadians(fovXdegree);
+		double fovYradian = Math.toRadians(fovXdegree * imageHeight / imageWidth );
+		float xLeft = (float) (-Math.tan(fovXradian / 2));
+		float xDelta = (float) (2 * Math.tan(fovXradian / 2) / (imageWidth - 1f));
+		float yBottom = (float) (-Math.tan(fovYradian / 2));
+		float yDelta = (float) (2 * Math.tan(fovYradian / 2) / (imageHeight -1f));
+		return new Vector3f(xLeft + x*xDelta, yBottom + y*yDelta, -1).normalize();
 	}
 
 	/** Calculates the intersection(s) between a ray and a sphere.
