@@ -1,6 +1,7 @@
 package your_code;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.joml.Matrix3f;
@@ -80,17 +81,20 @@ public class WorldModel {
 		if (exercise == ExerciseEnum.EX_0___Starting_point)
 			return new Vector3f(0);
 		else if (exercise == ExerciseEnum.EX_1_0_Colors_one_color) {
-
-			return new Vector3f(0);			
+			return new Vector3f(1f,1f,0);			
 		} else if (exercise == ExerciseEnum.EX_1_1_Colors_Random_color) {
-
-			return new Vector3f(0);			
+			return new Vector3f(new Random().nextFloat(), new Random().nextFloat(), new Random().nextFloat());
 		} else if (exercise == ExerciseEnum.EX_1_2_Colors_Color_space) {
-
-			return new Vector3f(0);			
+			Matrix3f m = new Matrix3f(-1f/(imageWidth-1),	-1f/(imageHeight-1),	1f,
+									   1f/(imageWidth-1),	 0f,					0f,
+									   0f,					 1f/(imageHeight-1),	0f);
+			m.transpose();
+			return m.transform(new Vector3f(x,y,1f));			
 		} else if (exercise == ExerciseEnum.EX_1_3_Colors_linear) {
-			
-			return new Vector3f(0);			
+			Vector3f c1 = new Vector3f(1f,0,0); 
+			Vector3f c2 = new Vector3f(0,1f,0); 
+			Vector3f c = c1.mul((float)(imageWidth-1-x)/(imageWidth-1)).add(c2.mul((float)x/(imageWidth-1))); 
+			return c;			
 		} else {
 
 			return new Vector3f(0);			
