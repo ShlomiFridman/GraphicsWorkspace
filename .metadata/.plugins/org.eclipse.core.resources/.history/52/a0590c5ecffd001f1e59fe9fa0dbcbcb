@@ -1,0 +1,648 @@
+package your_code;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+import org.joml.Vector4i;
+
+import app_interface.DisplayTypeEnum;
+import app_interface.ExerciseEnum;
+import app_interface.IntBufferWrapper;
+import app_interface.OBJLoader;
+import app_interface.TriangleFace;
+
+public class ObjectModel {
+	WorldModel worldModel;
+
+	private int imageWidth;
+	private int imageHeight;
+
+	private List<VertexData> verticesData;
+	private List<TriangleFace> faces;
+	private IntBufferWrapper textureImageIntBufferWrapper;
+
+	private Matrix4f modelM = new Matrix4f();
+	private Matrix4f lookatM = new Matrix4f();
+	private Matrix4f projectionM = new Matrix4f();
+	private Matrix4f viewportM = new Matrix4f();
+	private Vector3f boundingBoxDimensions;
+	private Vector3f boundingBoxCenter;
+
+	private Vector3f lightPositionEyeCoordinates = new Vector3f();
+	
+	public static ExerciseEnum exercise = ExerciseEnum.EX_10_2Texture_with_Phong;
+	
+	public ObjectModel(WorldModel worldModel, int imageWidth, int imageHeight) {
+		this.worldModel = worldModel;
+		this.imageWidth = imageWidth;
+		this.imageHeight = imageHeight;
+	}
+
+	void initTransfomations() {
+		this.modelM.identity();
+		this.modelM.identity();
+		this.lookatM.identity();
+		this.projectionM.identity();
+		this.viewportM.identity();
+	}
+	
+	void setModelM(Matrix4f modelM) {
+		this.modelM = modelM;
+	}
+
+	void setLookatM(Matrix4f lookatM) {
+		this.lookatM = lookatM;
+	}
+
+	void setProjectionM(Matrix4f projectionM) {
+		this.projectionM = projectionM;
+	}
+
+	void setViewportM(Matrix4f viewportM) {
+		this.viewportM = viewportM;
+	}
+
+	public Vector3f getBoundingBoxDimensions() {
+		return boundingBoxDimensions;
+	}
+
+	public Vector3f getBoundingBoxCenter() {
+		return boundingBoxCenter;
+	}
+
+	public boolean load(String fileName) {
+		OBJLoader objLoader = new OBJLoader();
+		try {
+			objLoader.loadOBJ(fileName);
+			verticesData = objLoader.getVertices();
+			faces = objLoader.getFaces();
+			boundingBoxDimensions = objLoader.getBoundingBoxDimensions();
+			boundingBoxCenter = objLoader.getBoundingBoxCenter();
+			textureImageIntBufferWrapper = objLoader.getTextureImageIntBufferWrapper();
+			return true;
+		} catch (IOException e) {
+			//System.err.println("Failed to load the OBJ file.");
+			return false;
+		}
+	}
+	
+	public boolean objectHasTexture() {
+		return textureImageIntBufferWrapper != null;
+	}
+
+	public void render(IntBufferWrapper intBufferWrapper) {
+		exercise = worldModel.exercise;
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		if (exercise.ordinal() >= ExerciseEnum.EX_9___Lighting.ordinal()) {
+			Vector4f t1 = new Vector4f(worldModel.lightPositionWorldCoordinates, 1f);
+			lookatM.transform(t1);
+			lightPositionEyeCoordinates = new Vector3f(t1.x, t1.y, t1.z);
+		}
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		
+		if (verticesData != null) {
+			for (VertexData vertexData : verticesData) {
+				vertexProcessing(intBufferWrapper, vertexData);
+			}
+			for (TriangleFace face : faces) {
+				rasterization(intBufferWrapper,	
+						verticesData.get(face.indices[0]), 
+						verticesData.get(face.indices[1]), 
+						verticesData.get(face.indices[2]), 
+						face.color);
+			}
+		}
+	}
+
+	private void vertexProcessing(IntBufferWrapper intBufferWrapper, VertexData vertex) {
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		if (exercise.ordinal() <= ExerciseEnum.EX_3_3_Object_transformation___4_objects.ordinal()) {
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+			// Initialize a 4D vector from the 3D vertex point
+			Vector4f t = new Vector4f(vertex.pointObjectCoordinates, 1f);
+	
+			// Transform only model transformation
+			modelM.transform(t);
+	
+			vertex.pointWindowCoordinates = new Vector3f(t.x, t.y, t.z);
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		}
+		else {
+			// Initialize a 4D vector from the 3D vertex point
+			Vector4f t = new Vector4f(vertex.pointObjectCoordinates, 1f);
+	
+			// Transform to eye coordinates (model-view transformation)
+			modelM.transform(t);
+			lookatM.transform(t);
+			
+			vertex.pointEyeCoordinates = new Vector3f(t.x, t.y, t.z);
+	
+			// Apply projection transformation
+			projectionM.transform(t);
+	
+			// Perspective divide if w is non-zero
+			if (t.w != 0) {
+				t.mul(1 / t.w);
+			} else {
+				System.err.println("Division by w == 0 in vertexProcessing");
+			}
+	
+			// Apply viewport transformation and set screen point
+			viewportM.transform(t);
+			vertex.pointWindowCoordinates = new Vector3f(t.x, t.y, t.z);
+		}
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+		// transformation normal from object coordinates to eye coordinates v->normal
+		///////////////////////////////////////////////////////////////////////////////////
+		transformNormalFromObjectCoordToEyeCoordAndDrawIt(intBufferWrapper, vertex);
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		if (exercise.ordinal() >= ExerciseEnum.EX_9___Lighting.ordinal()) {
+			vertex.lightingIntensity0to1 = lightingEquation(vertex.pointEyeCoordinates, vertex.normalEyeCoordinates,
+					lightPositionEyeCoordinates, worldModel.lighting_Diffuse, worldModel.lighting_Specular,
+					worldModel.lighting_Ambient, worldModel.lighting_sHininess);
+		}
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+	}
+
+	private void transformNormalFromObjectCoordToEyeCoordAndDrawIt(IntBufferWrapper intBufferWrapper, VertexData vertex) {
+		// transformation normal from object coordinates to eye coordinates v->normal
+		///////////////////////////////////////////////////////////////////////////////////
+		// --> v->NormalEyeCoordinates
+		Matrix4f modelviewM = new Matrix4f(lookatM).mul(modelM);
+		Matrix3f modelviewM3x3 = new Matrix3f();
+		modelviewM.get3x3(modelviewM3x3);
+		vertex.normalEyeCoordinates = new Vector3f();
+		modelviewM3x3.transform(vertex.normalObjectCoordinates, vertex.normalEyeCoordinates);
+		if (worldModel.displayNormals) {
+			// drawing normals
+			Vector3f t1 = new Vector3f(vertex.normalEyeCoordinates);
+			Vector4f point_plusNormal_eyeCoordinates = new Vector4f(t1.mul(0.1f).add(vertex.pointEyeCoordinates),
+					1);
+			Vector4f t2 = new Vector4f(point_plusNormal_eyeCoordinates);
+			// modelviewM.transform(t2);
+			projectionM.transform(t2);
+			if (t2.w != 0) {
+				t2.mul(1 / t2.w);
+			} else {
+				System.err.println("Division by w == 0 in vertexProcessing normal transformation");
+			}
+			viewportM.transform(t2);
+			Vector3f point_plusNormal_screen = new Vector3f(t2.x, t2.y, t2.z);
+			drawLineDDA(intBufferWrapper, vertex.pointWindowCoordinates, point_plusNormal_screen, 0, 0, 1f);
+		}
+		
+	}
+	
+	
+	private void rasterization(IntBufferWrapper intBufferWrapper, VertexData vertex1, VertexData vertex2, VertexData vertex3, Vector3f faceColor) {
+
+		Vector3f faceNormal = new Vector3f(vertex2.pointEyeCoordinates).sub(vertex1.pointEyeCoordinates)
+					.cross(new Vector3f(vertex3.pointEyeCoordinates).sub(vertex1.pointEyeCoordinates))
+					.normalize();
+		
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		if (exercise.ordinal() <= ExerciseEnum.EX_1___Lines_rasterization.ordinal()) {
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+			intBufferWrapper.setPixel((int) vertex1.pointWindowCoordinates.x, (int) vertex1.pointWindowCoordinates.y, 1f, 1f, 1f);
+			intBufferWrapper.setPixel((int) vertex2.pointWindowCoordinates.x, (int) vertex2.pointWindowCoordinates.y, 1f, 1f, 1f);
+			intBufferWrapper.setPixel((int) vertex3.pointWindowCoordinates.x, (int) vertex3.pointWindowCoordinates.y, 1f, 1f, 1f);
+			
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		}
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+//		if (worldModel.displayType == DisplayTypeEnum.FACE_EDGES) {
+		if (exercise.ordinal() == ExerciseEnum.EX_1___Lines_rasterization.ordinal()) {
+			
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+			if (exercise.ordinal() >= ExerciseEnum.EX_1___Lines_rasterization.ordinal()) {
+				drawLineDDA(intBufferWrapper, vertex1.pointWindowCoordinates, vertex2.pointWindowCoordinates, 1f, 1f, 1f);
+				drawLineDDA(intBufferWrapper, vertex2.pointWindowCoordinates, vertex3.pointWindowCoordinates, 1f, 1f, 1f);
+				drawLineDDA(intBufferWrapper, vertex3.pointWindowCoordinates, vertex1.pointWindowCoordinates, 1f, 1f, 1f);
+			}
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+		} else {
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+			if (exercise.ordinal() >= ExerciseEnum.EX_2___Triangles_rasterization.ordinal()) {
+				float pixelIntensity0to1 = 
+						lightingEquation(vertex1.pointEyeCoordinates, faceNormal,
+								lightPositionEyeCoordinates, worldModel.lighting_Diffuse,
+								worldModel.lighting_Specular, worldModel.lighting_Ambient,
+								worldModel.lighting_sHininess);
+
+				BarycentricCoordinates barycentricCoordinates = new BarycentricCoordinates(vertex1.pointWindowCoordinates, vertex2.pointWindowCoordinates, vertex3.pointWindowCoordinates); 
+
+				Vector4i boundingBox = calcBoundingBox(vertex1.pointWindowCoordinates, vertex2.pointWindowCoordinates, vertex3.pointWindowCoordinates, imageWidth, imageHeight); 
+				for (int x = boundingBox.get(0); x <= boundingBox.get(1); x++) {
+					for (int y = boundingBox.get(2); y <= boundingBox.get(3); y++) {
+						barycentricCoordinates.calcCoordinatesForPoint(x,y);
+
+						if(barycentricCoordinates.isPointInside()) {
+
+							FragmentData fragmentData = new FragmentData();
+
+//							if (worldModel.displayType == DisplayTypeEnum.FACE_COLOR) {
+							if(exercise.ordinal() == ExerciseEnum.EX_2___Triangles_rasterization.ordinal()) {
+								fragmentData.pixelColor = faceColor;
+							}
+
+							if (exercise.ordinal() >= ExerciseEnum.EX_7___Vertex_color_interpolation.ordinal())
+//								if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {
+								if (exercise.ordinal() == ExerciseEnum.EX_7___Vertex_color_interpolation.ordinal()) {
+									fragmentData.pixelColor = barycentricCoordinates.interpolate(
+											vertex1.color, vertex2.color, vertex3.color);
+								}
+
+//							if (exercise.ordinal() >= ExerciseEnum.EX_9___Lighting.ordinal()) {
+							if (exercise.ordinal() >= ExerciseEnum.EX_9_1_Lighting_flat.ordinal()) {
+								//if (worldModel.displayType == DisplayTypeEnum.LIGHTING_FLAT) {
+								if (exercise.ordinal() == ExerciseEnum.EX_9_1_Lighting_flat.ordinal()) {
+									fragmentData.pixelIntensity0to1 = pixelIntensity0to1; 
+
+//									fragmentData.pixelIntensity0to1 = 
+//											lightingEquation(vertex1.pointEyeCoordinates, faceNormal,
+//													lightPositionEyeCoordinates, worldModel.lighting_Diffuse,
+//													worldModel.lighting_Specular, worldModel.lighting_Ambient,
+//													worldModel.lighting_sHininess);
+//								} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_GOURARD) {
+								} else if (exercise.ordinal() == ExerciseEnum.EX_9_2_Lighting_Gourard.ordinal()) {
+									fragmentData.pixelIntensity0to1 = 
+											barycentricCoordinates.interpolate(
+													vertex1.lightingIntensity0to1, vertex2.lightingIntensity0to1, vertex3.lightingIntensity0to1);
+//								} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_PHONG) {
+								} else if (exercise.ordinal() == ExerciseEnum.EX_9_3_Lighting_Phong.ordinal()) {
+									fragmentData.pointEyeCoordinates = barycentricCoordinates.interpolate(
+											vertex1.pointEyeCoordinates, vertex2.pointEyeCoordinates, vertex3.pointEyeCoordinates);
+									fragmentData.normalEyeCoordinates = barycentricCoordinates.interpolate(
+											vertex1.normalEyeCoordinates, vertex2.normalEyeCoordinates, vertex3.normalEyeCoordinates);
+								}
+							}
+							if (exercise.ordinal() >= ExerciseEnum.EX_10__Texture.ordinal()) {
+								if (worldModel.displayType == DisplayTypeEnum.TEXTURE) {
+									fragmentData.textureCoordinates = barycentricCoordinates.interpolate(
+											vertex1.textureCoordinates,	vertex2.textureCoordinates, vertex3.textureCoordinates);
+								}
+								if (worldModel.displayType == DisplayTypeEnum.TEXTURE_LIGHTING) {
+									//calculating texture
+									fragmentData.textureCoordinates = barycentricCoordinates.interpolate(
+											vertex1.textureCoordinates,	vertex2.textureCoordinates, vertex3.textureCoordinates);
+
+									//calculating phong shading
+									fragmentData.pointEyeCoordinates = barycentricCoordinates.interpolate(
+											vertex1.pointEyeCoordinates, vertex2.pointEyeCoordinates, vertex3.pointEyeCoordinates);
+									fragmentData.normalEyeCoordinates = barycentricCoordinates.interpolate(
+											vertex1.normalEyeCoordinates, vertex2.normalEyeCoordinates, vertex3.normalEyeCoordinates);
+								}
+
+							}
+
+							if (exercise.ordinal() >= ExerciseEnum.EX_8___Z_buffer.ordinal()) {
+								float pixelZ = barycentricCoordinates.interpolate(vertex1.pointWindowCoordinates.z,
+										vertex2.pointWindowCoordinates.z, vertex3.pointWindowCoordinates.z);
+								if (pixelZ < worldModel.zBuffer[y][x]) {
+									worldModel.zBuffer[y][x] = pixelZ;
+
+									Vector3f pixelColor = fragmentProcessing(fragmentData);
+									intBufferWrapper.setPixel((int) x, (int) y, pixelColor);
+								}
+							} else {
+								Vector3f pixelColor = fragmentProcessing(fragmentData);
+								intBufferWrapper.setPixel((int) x, (int) y, pixelColor);
+							}
+
+
+						}
+
+					}
+				}
+			}
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+		}
+		
+	}
+
+	
+	private Vector3f fragmentProcessing(FragmentData fragmentData) {
+		
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		Vector3f pixelColor = new Vector3f();
+//		if (worldModel.displayType == DisplayTypeEnum.FACE_COLOR) {
+		if(exercise.ordinal() == ExerciseEnum.EX_2___Triangles_rasterization.ordinal()) {
+			return fragmentData.pixelColor;
+		}
+
+		if (exercise.ordinal() >= ExerciseEnum.EX_7___Vertex_color_interpolation.ordinal())
+//			if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {
+			if (exercise.ordinal() == ExerciseEnum.EX_7___Vertex_color_interpolation.ordinal()) {
+				return fragmentData.pixelColor;
+			}
+
+		if (exercise.ordinal() >= ExerciseEnum.EX_9_1_Lighting_flat.ordinal()) {
+//			if (worldModel.displayType == DisplayTypeEnum.LIGHTING_FLAT) {
+			if (exercise.ordinal() == ExerciseEnum.EX_9_1_Lighting_flat.ordinal()) {
+				return new Vector3f(fragmentData.pixelIntensity0to1);
+//			} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_GOURARD) {
+			} else if (exercise.ordinal() == ExerciseEnum.EX_9_2_Lighting_Gourard.ordinal()) {
+				return new Vector3f(fragmentData.pixelIntensity0to1);
+//			} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_PHONG) {
+			} else if (exercise.ordinal() == ExerciseEnum.EX_9_3_Lighting_Phong.ordinal()) {
+				float pixellightingIntensity = 
+						lightingEquation(fragmentData.pointEyeCoordinates, fragmentData.normalEyeCoordinates,
+								lightPositionEyeCoordinates, worldModel.lighting_Diffuse,
+								worldModel.lighting_Specular, worldModel.lighting_Ambient,
+								worldModel.lighting_sHininess);
+				return new Vector3f(pixellightingIntensity);
+			}
+		}
+		if (exercise.ordinal() >= ExerciseEnum.EX_10__Texture.ordinal()) {
+			if (worldModel.displayType == DisplayTypeEnum.TEXTURE) {
+				//calculating texture
+				Vector3f textureColor = textureImageIntBufferWrapper.getPixel(
+						(int)Math.round(fragmentData.textureCoordinates.x * (textureImageIntBufferWrapper.getImageWidth()-1)), 
+						(int)Math.round(fragmentData.textureCoordinates.y * (textureImageIntBufferWrapper.getImageHeight()-1)));
+				return textureColor;
+			}
+			if (worldModel.displayType == DisplayTypeEnum.TEXTURE_LIGHTING) {
+				//calculating texture
+				Vector3f textureColor = textureImageIntBufferWrapper.getPixel(
+						(int)Math.round(fragmentData.textureCoordinates.x * (textureImageIntBufferWrapper.getImageWidth()-1)), 
+						(int)Math.round(fragmentData.textureCoordinates.y * (textureImageIntBufferWrapper.getImageHeight()-1)));
+
+				//calculating phong shading
+				float pixellightingIntensity = 
+						lightingEquation(fragmentData.pointEyeCoordinates, fragmentData.normalEyeCoordinates,
+								lightPositionEyeCoordinates, worldModel.lighting_Diffuse,
+								worldModel.lighting_Specular, worldModel.lighting_Ambient,
+								worldModel.lighting_sHininess);
+				
+				//multiplying between the texture and the lighting intensity
+				return textureColor.mul(pixellightingIntensity);
+			}
+		}
+		return new Vector3f();
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+//		if (worldModel.displayType == DisplayTypeEnum.FACE_COLOR) {
+//		} else if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {
+//		} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_FLAT) {
+//		} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_GOURARD) {
+//		} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_PHONG) {
+//		} else if (worldModel.displayType == DisplayTypeEnum.TEXTURE) {
+//		} else if (worldModel.displayType == DisplayTypeEnum.TEXTURE_LIGHTING) {
+//		}
+//		return new Vector3f();
+////////////////////////////////////////////////////////////////////////////////////
+		
+	}
+
+	
+
+	static void drawLineDDA(IntBufferWrapper intBufferWrapper, Vector3f p1, Vector3f p2, float r, float g, float b) {
+		int x1round = Math.round(p1.x);
+		int y1round = Math.round(p1.y);
+		int x2round = Math.round(p2.x);
+		int y2round = Math.round(p2.y);
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		if (exercise.ordinal() >= ExerciseEnum.EX_1___Lines_rasterization.ordinal()) {
+
+			int x1, y1, x2, y2;
+//			if ((y2round - y1round) < -(x2round - x1round)
+//					|| ((y2round - y1round) == -(x2round - x1round)) && ((x2round - x1round) < 0)) {
+//				x1 = Math.round(p2.x);
+//				y1 = Math.round(p2.y);
+//				x2 = Math.round(p1.x);
+//				y2 = Math.round(p1.y);
+//			} else {
+//				x1 = Math.round(p1.x);
+//				y1 = Math.round(p1.y);
+//				x2 = Math.round(p2.x);
+//				y2 = Math.round(p2.y);
+//			}
+		    int dx_ = x2round - x1round;
+		    int dy_ = y2round - y1round;
+		    if (dy_ < -dx_ || (dy_ == -dx_ && dx_ < 0)) {
+		        x1 = x2round;
+		        y1 = y2round;
+		        x2 = x1round;
+		        y2 = y1round;
+		    } else {
+		        x1 = x1round;
+		        y1 = y1round;
+		        x2 = x2round;
+		        y2 = y2round;
+		    }			
+
+			float dx = x2 - x1;
+			float dy = y2 - y1;
+			if (Math.abs(dy) <= Math.abs(dx)) {
+//				float a = (dx == 0) ? 0 : dy / dx; // Avoid division by zero
+				float a = dy / dx;
+				float y = y1;
+				int yi;
+				for (int x = x1; x < x2; x++) {
+					yi = Math.round(y);
+					intBufferWrapper.setPixel(x, yi, r, g, b);
+					y = y + a;
+				}
+			} else {
+//				float a = (dy == 0) ? 0 : dx / dy; // Avoid division by zero
+				float a = dx / dy;
+				float x = x1;
+				int xi;
+				for (int y = y1; y < y2; y++) {
+					xi = Math.round(x);
+					intBufferWrapper.setPixel(xi, y, r, g, b);
+					x = x + a;
+				}
+			}
+		}
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+		
+	}
+
+
+
+	static Vector4i calcBoundingBox(Vector3f p1, Vector3f p2, Vector3f p3, int imageWidth, int imageHeight) { 
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+// EX_2___Triangles_rasterization
+		int minX = (int) Math.floor(Math.max(0.0f, 
+				Math.min(Math.min(p1.x, p2.x), p3.x)));
+		int minY = (int) Math.floor(Math.max(0.0f, 
+				Math.min(Math.min(p1.y, p2.y), p3.y)));
+		int maxX = (int) Math.ceil(Math.min((float) imageWidth - 1, 
+				Math.max(Math.max(p1.x, p2.x), p3.x)));
+		int maxY = (int) Math.ceil(Math.min((float) imageHeight - 1, 
+				Math.max(Math.max(p1.y, p2.y), p3.y)));
+		return new Vector4i(minX, maxX, minY, maxY);
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+//		return new Vector4i();
+////////////////////////////////////////////////////////////////////////////////////
+
+	}
+
+	
+	float lightingEquation(Vector3f point, Vector3f PointNormal, Vector3f LightPos, float Kd, float Ks, float Ka, float shininess) {
+
+		Vector3f color = lightingEquation(point, PointNormal, LightPos, 
+				                          new Vector3f(Kd), new Vector3f(Ks), new Vector3f(Ka), shininess);
+		return color.get(0);
+	}
+	
+	
+	private static Vector3f lightingEquation(Vector3f point, Vector3f PointNormal, Vector3f LightPos, Vector3f Kd,
+			Vector3f Ks, Vector3f Ka, float shininess) {
+
+		Vector3f returnedColor = new Vector3f();
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+	if (exercise.ordinal() >= ExerciseEnum.EX_9___Lighting.ordinal()) {
+		// LightDirection
+		Vector3f LightDirection = new Vector3f(LightPos).sub(point).normalize();
+
+		// Diffuse component: Kd * ( max(0, N · L ))
+		float NdotL = PointNormal.dot(LightDirection);
+		Vector3f diffuse = new Vector3f(Kd).mul(Math.max(0.0f, NdotL));
+		returnedColor.add(diffuse);
+
+		// Ambient component: Ka
+		Vector3f ambient = new Vector3f(Ka);
+		returnedColor.add(ambient);
+
+		// Specular component: Ks * ( max(0, R · V) )^n
+		// EyeDirection
+		Vector3f EyePos = new Vector3f(0, 0, 0);
+		Vector3f EyeDirection = new Vector3f(EyePos).sub(point).normalize();
+
+		// Calculate ReflectionDirection based on LightDirection and PointNormal
+		NdotL = PointNormal.dot(LightDirection);
+		Vector3f ReflectionDirection;
+		if (NdotL > 0) {
+			ReflectionDirection = new Vector3f(PointNormal).mul(2.0f * NdotL).sub(LightDirection).normalize();
+		} else {
+			ReflectionDirection = new Vector3f(0, 0, 0);
+		}
+
+		// Specular component: Ks * (R · V)^n (guarding against negative R · V)
+		float RdotV = Math.max(0.0f, ReflectionDirection.dot(EyeDirection));
+		Vector3f specular = new Vector3f(Ks).mul((float) Math.pow(RdotV, shininess));
+		returnedColor.add(specular);
+	}
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+/////////////// solution ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+		return returnedColor;
+	}	
+}
+
+

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<parameters>
+    <modelFileName>./Models/models_0to600/ex_01___FirstExample_0to600.obj</modelFileName>
+    <saveImagePath>./Models/</saveImagePath>
+    <projectionType>ORTHOGRAPHIC</projectionType>
+    <displayType>FACE_EDGES</displayType>
+    <displayNormals>false</displayNormals>
+    <exercise>EX_0___Starting_point</exercise>
+</parameters>
