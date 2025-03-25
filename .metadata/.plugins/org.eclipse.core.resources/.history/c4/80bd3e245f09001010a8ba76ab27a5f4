@@ -1,6 +1,3 @@
-// student 1 - Omer Goldstein - 205906258
-// student 2 - Shlomi Fridman - 318187002
-
 package your_code;
 
 import java.util.ArrayList;
@@ -212,25 +209,30 @@ public class WorldModel {
 	 * @param spheres The list of spheres to check for intersections.
 	 * @return An IntersectionResults object containing information about the nearest intersection,
 	 *         or an empty IntersectionResults object if no intersection occurs. */	
-	private static IntersectionResults rayIntersection(Vector3f rayStart, Vector3f rayDirection, List<ModelSphere> spheres) {
-	    IntersectionResults closestIntersection = null;
-	    float maxZ = Float.NEGATIVE_INFINITY;
-
-	    for (ModelSphere sphere : spheres) {
-	        IntersectionResults intersection = rayIntersection(rayStart, rayDirection, sphere);
-	        if (intersection != null && intersection.intersectionPoint.z > maxZ) {
-	            maxZ = intersection.intersectionPoint.z;
-	            closestIntersection = intersection;
-	        }
-	    }
-
-	    if (closestIntersection != null) {
-	        closestIntersection.intersectionPoint.z = -closestIntersection.intersectionPoint.z;
-	    }
-	    
-	    return closestIntersection;
+	private static IntersectionResults rayIntersection(Vector3f rayStart, Vector3f rayDirection,
+			List<ModelSphere> spheres) {
+		IntersectionResults intersectionResults;
+		Vector3f minZ = null;
+		IntersectionResults minRes = null;
+		for (ModelSphere sphere:spheres) {
+			intersectionResults = rayIntersection(rayStart,rayDirection,sphere);
+			if(intersectionResults != null) {
+				if(minZ == null) {
+					minZ = new Vector3f (intersectionResults.intersectionPoint);
+					minRes = intersectionResults;
+				}
+				if(minZ.z < intersectionResults.intersectionPoint.z) {
+					minZ.z = intersectionResults.intersectionPoint.z;
+					minRes = intersectionResults;
+				}
+			}
+		}
+		if(minRes != null) {
+			minRes.intersectionPoint.z = -minRes.intersectionPoint.z;
+			return minRes;
+		}
+		return null;
 	}
-
 
 	
 	/** Calculates the lighting at a specific point.
