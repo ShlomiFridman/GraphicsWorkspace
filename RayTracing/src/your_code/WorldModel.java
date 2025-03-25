@@ -1,14 +1,32 @@
 package your_code;
 
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.util.ArrayList;
+
 // student 1 - Omer Goldstein - 205906258
 // student 2 - Shlomi Fridman - 318187002
 
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.joml.Matrix3dc;
 import org.joml.Matrix3f;
+import org.joml.Matrix3fc;
+import org.joml.Matrix3x2dc;
+import org.joml.Matrix3x2fc;
+import org.joml.Matrix4dc;
+import org.joml.Matrix4fc;
+import org.joml.Matrix4x3dc;
+import org.joml.Matrix4x3fc;
+import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.joml.Vector3i;
 
 import app_interface.ExerciseEnum;
 import app_interface.Model;
@@ -118,8 +136,28 @@ public class WorldModel {
 	private static Vector3f rayTracing(Vector3f incidentRayOrigin, Vector3f incidentRayDirection, Model model,
 			SphereTexture skyBoxImageSphereTexture, int depthLevel) {
 
-		Vector3f returnedColor = skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
+		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin, incidentRayDirection, model.spheres);
+//		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin, incidentRayDirection, model.spheres.get(0));
 		
+		// if no intersection, return the skyBox
+		if (intersectionResults == null)
+			return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
+		
+		
+		ModelSphere intersectedSphere = intersectionResults.intersectedSphere;
+		ModelMaterial intersectedSphereMaterial =
+				model.materials.get(intersectedSphere.materialIndex);
+		Vector3f intersectionPoint = intersectionResults.intersectionPoint;
+		Vector3f intersectionNormal = intersectionResults.normal;
+		boolean intersectionFromOutsideOfSphere =
+		intersectionResults.rayFromOutsideOfSphere;
+		SphereTexture intersectedSphereTexture = model.skyBoxImageSphereTextures
+				.get(intersectedSphere.textureIndex);
+		
+		Vector3f color = new Vector3f(intersectedSphereMaterial.color);
+		float kColor = intersectedSphereMaterial.kColor;
+		
+		Vector3f returnedColor = color.mul(kColor);
 		return returnedColor;
 	}
 
@@ -133,12 +171,11 @@ public class WorldModel {
 	 * @return The normalized direction vector of the ray for the given pixel. */	
 	static Vector3f calcPixelDirection(int x, int y, int imageWidth, int imageHeight, float fovXdegree) {
 		double fovXradian = Math.toRadians(fovXdegree);
-		double fovYradian = Math.toRadians(fovXdegree / imageWidth * imageHeight);
-		float xLeft = (float) (-Math.tan(fovXradian/2));
-		float xDelta = (float) (2*Math.tan(fovXradian/2) / (imageWidth-1f));
-		float yBottom = (float) (-Math.tan(fovYradian/2));
-		float yDelta = (float) (2*Math.tan(fovYradian/2) / (imageHeight-1f));
-		
+		double fovYradian = Math.toRadians(fovXdegree * imageHeight / imageWidth );
+		float xLeft = (float) (-Math.tan(fovXradian / 2));
+		float xDelta = (float) (2 * Math.tan(fovXradian / 2) / (imageWidth - 1f));
+		float yBottom = (float) (-Math.tan(fovYradian / 2));
+		float yDelta = (float) (2 * Math.tan(fovYradian / 2) / (imageHeight -1f));
 		return new Vector3f(xLeft + x*xDelta, yBottom + y*yDelta, -1).normalize();
 	}
 
@@ -205,7 +242,23 @@ public class WorldModel {
 	private static IntersectionResults rayIntersection(Vector3f rayStart, Vector3f rayDirection,
 			List<ModelSphere> spheres) {
 
-		return null;
+		ArrayList<IntersectionResults> intersectionResultsList = new ArrayList<>();
+		for (ModelSphere sphere : spheres) {
+			IntersectionResults tmp_result = rayIntersection(rayStart, rayDirection, sphere);
+			if (tmp_result != null)
+				intersectionResultsList.add(tmp_result);
+		}
+		
+		if (intersectionResultsList.isEmpty())
+			return null;
+		
+		intersectionResultsList.sort((res1, res2)->{
+			Vector3f p1 = res1.intersectedSphere.center;
+			Vector3f p2 = res2.intersectedSphere.center;
+			return (int) (p2.z - p1.z);
+		});
+		
+		return intersectionResultsList.get(0);
 	}
 
 	

@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-    <fullyQualifiedTypeName name="javafx.scene.image.ImageView"/>
-    <fullyQualifiedTypeName name="java.nio.IntBuffer"/>
-    <fullyQualifiedTypeName name="javafx.scene.Group"/>
-    <fullyQualifiedTypeName name="rasterization_app.OBJLoader"/>
     <fullyQualifiedTypeName name="com.jogamp.opengl.swt.GLCanvas"/>
     <fullyQualifiedTypeName name="com.jogamp.opengl.awt.GLCanvas"/>
     <fullyQualifiedTypeName name="java.awt.Container"/>
@@ -36,7 +32,6 @@
     <fullyQualifiedTypeName name="java.nio.file.Path"/>
     <fullyQualifiedTypeName name="app_interface.Model"/>
     <fullyQualifiedTypeName name="app_interface.InterfaceDefaultParams"/>
-    <fullyQualifiedTypeName name="app_interface.ExerciseEnum"/>
     <fullyQualifiedTypeName name="javafx.scene.canvas.Canvas"/>
     <fullyQualifiedTypeName name="javafx.scene.paint.Color"/>
     <fullyQualifiedTypeName name="java.util.concurrent.atomic.AtomicBoolean"/>
@@ -47,11 +42,8 @@
     <fullyQualifiedTypeName name="app_interface.Sphere"/>
     <fullyQualifiedTypeName name="app_interface.Light"/>
     <fullyQualifiedTypeName name="app_interface.Material"/>
-    <fullyQualifiedTypeName name="org.joml.Vector3fc"/>
-    <fullyQualifiedTypeName name="your_code.IntersectionResults"/>
     <fullyQualifiedTypeName name="app_interface.IntBufferWrapper"/>
     <fullyQualifiedTypeName name="org.joml.Vector4f"/>
-    <fullyQualifiedTypeName name="app_interface.ModelSphere"/>
     <fullyQualifiedTypeName name="app_interface.SphereTexture"/>
     <fullyQualifiedTypeName name="java.util.Arrays"/>
     <fullyQualifiedTypeName name="your_code.BarycentricCoordinates"/>
@@ -59,5 +51,13 @@
     <fullyQualifiedTypeName name="your_code.ErrorLogger.ErrorType"/>
     <fullyQualifiedTypeName name="java.util.Random"/>
     <fullyQualifiedTypeName name="org.joml.Matrix3f"/>
+    <fullyQualifiedTypeName name="app_interface.ExerciseEnum"/>
+    <fullyQualifiedTypeName name="your_code.IntersectionResults"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
+    <fullyQualifiedTypeName name="app_interface.ModelSphere"/>
+    <fullyQualifiedTypeName name="java.util.PriorityQueue"/>
+    <fullyQualifiedTypeName name="java.util.Comparator"/>
+    <fullyQualifiedTypeName name="java.lang.Math"/>
+    <fullyQualifiedTypeName name="org.joml.Vector3fc"/>
     <fullyQualifiedTypeName name="org.joml.Vector3f"/>
 </qualifiedTypeNameHistroy>
