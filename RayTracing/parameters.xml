@@ -3,5 +3,5 @@
     <modelFileName>.\Models\ex_03_3_FewSpheres_simpleColors.model</modelFileName>
     <saveImagePath>./</saveImagePath>
     <depthOfRayTracing>1</depthOfRayTracing>
-    <exercise>EX_3_1_Intersection_One_sphere</exercise>
+    <exercise>EX_3_4_Intersection_Finding_the_nearest_sphere</exercise>
 </parameters>

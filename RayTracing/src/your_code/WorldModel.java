@@ -1,5 +1,6 @@
 package your_code;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -127,7 +128,6 @@ public class WorldModel {
 		float kColor = intersectedSphereMaterial.kColor;
 		return new Vector3f(color.mul(kColor));
 		
-//		3.3
 		
 	}
 
@@ -212,10 +212,24 @@ public class WorldModel {
 	private static IntersectionResults rayIntersection(Vector3f rayStart, Vector3f rayDirection,
 			List<ModelSphere> spheres) {
 		IntersectionResults intersectionResults;
+		Vector3f minZ = null;
+		IntersectionResults minRes = null;
 		for (ModelSphere sphere:spheres) {
 			intersectionResults = rayIntersection(rayStart,rayDirection,sphere);
-			if(intersectionResults != null)
-				return intersectionResults;
+			if(intersectionResults != null) {
+				if(minZ == null) {
+					minZ = new Vector3f (intersectionResults.intersectionPoint);
+					minRes = intersectionResults;
+				}
+				if(minZ.z < intersectionResults.intersectionPoint.z) {
+					minZ.z = intersectionResults.intersectionPoint.z;
+					minRes = intersectionResults;
+				}
+			}
+		}
+		if(minRes != null) {
+			minRes.intersectionPoint.z = -minRes.intersectionPoint.z;
+			return minRes;
 		}
 		return null;
 	}
