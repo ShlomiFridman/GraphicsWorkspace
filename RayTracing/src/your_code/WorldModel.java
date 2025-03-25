@@ -1,5 +1,8 @@
 package your_code;
 
+// student 1 - Omer Goldstein - 205906258
+// student 2 - Shlomi Fridman - 318187002
+
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
