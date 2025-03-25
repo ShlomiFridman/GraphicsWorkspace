@@ -110,7 +110,7 @@ public class WorldModel {
 	 * @return The calculated color for the pixel based on ray tracing and lighting effects. */	
 	private static Vector3f rayTracing(Vector3f incidentRayOrigin, Vector3f incidentRayDirection, Model model,
 			SphereTexture skyBoxImageSphereTexture, int depthLevel) {
-		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin,incidentRayDirection,model.spheres);
+		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin,incidentRayDirection,model.spheres.get(0));
 		if(intersectionResults == null)
 			return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
 //		3.1
@@ -211,12 +211,7 @@ public class WorldModel {
 	 *         or an empty IntersectionResults object if no intersection occurs. */	
 	private static IntersectionResults rayIntersection(Vector3f rayStart, Vector3f rayDirection,
 			List<ModelSphere> spheres) {
-		IntersectionResults intersectionResults;
-		for (ModelSphere sphere:spheres) {
-			intersectionResults = rayIntersection(rayStart,rayDirection,sphere);
-			if(intersectionResults != null)
-				return intersectionResults;
-		}
+
 		return null;
 	}
 

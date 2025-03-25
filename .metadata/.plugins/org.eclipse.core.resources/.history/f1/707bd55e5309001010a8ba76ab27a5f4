@@ -112,7 +112,8 @@ public class WorldModel {
 			SphereTexture skyBoxImageSphereTexture, int depthLevel) {
 		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin,incidentRayDirection,model.spheres);
 		if(intersectionResults == null)
-			return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
+			return new Vector3f(0);
+//			return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
 //		3.1
 		ModelSphere intersectedSphere = intersectionResults.intersectedSphere;
 		ModelMaterial intersectedSphereMaterial = model.materials.get(intersectedSphere.materialIndex);

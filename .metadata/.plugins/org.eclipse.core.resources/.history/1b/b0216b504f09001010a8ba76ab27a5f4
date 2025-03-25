@@ -110,24 +110,16 @@ public class WorldModel {
 	 * @return The calculated color for the pixel based on ray tracing and lighting effects. */	
 	private static Vector3f rayTracing(Vector3f incidentRayOrigin, Vector3f incidentRayDirection, Model model,
 			SphereTexture skyBoxImageSphereTexture, int depthLevel) {
-		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin,incidentRayDirection,model.spheres);
-		if(intersectionResults == null)
+		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin,incidentRayDirection,model.spheres.get(0));
+		if(intersectionResults != null)
 			return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
-//		3.1
 		ModelSphere intersectedSphere = intersectionResults.intersectedSphere;
 		ModelMaterial intersectedSphereMaterial = model.materials.get(intersectedSphere.materialIndex);
 		Vector3f intersectionPoint = intersectionResults.intersectionPoint;
 		Vector3f intersectionNormal = intersectionResults.normal;
 		boolean intersectionFromOutsideOfSphere = intersectionResults.rayFromOutsideOfSphere;
 		SphereTexture intersectedSphereTexture = model.skyBoxImageSphereTextures .get(intersectedSphere.textureIndex);
-		//return new Vector3f(0);
-		
-//		3.2
-		Vector3f color = intersectedSphereMaterial.color;
-		float kColor = intersectedSphereMaterial.kColor;
-		return new Vector3f(color.mul(kColor));
-		
-//		3.3
+		return new Vector3f(0);
 		
 	}
 
@@ -211,12 +203,7 @@ public class WorldModel {
 	 *         or an empty IntersectionResults object if no intersection occurs. */	
 	private static IntersectionResults rayIntersection(Vector3f rayStart, Vector3f rayDirection,
 			List<ModelSphere> spheres) {
-		IntersectionResults intersectionResults;
-		for (ModelSphere sphere:spheres) {
-			intersectionResults = rayIntersection(rayStart,rayDirection,sphere);
-			if(intersectionResults != null)
-				return intersectionResults;
-		}
+
 		return null;
 	}
 

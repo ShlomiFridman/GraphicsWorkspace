@@ -111,7 +111,7 @@ public class WorldModel {
 	private static Vector3f rayTracing(Vector3f incidentRayOrigin, Vector3f incidentRayDirection, Model model,
 			SphereTexture skyBoxImageSphereTexture, int depthLevel) {
 		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin,incidentRayDirection,model.spheres);
-		if(intersectionResults == null)
+		if(intersectionResults != null)
 			return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
 //		3.1
 		ModelSphere intersectedSphere = intersectionResults.intersectedSphere;

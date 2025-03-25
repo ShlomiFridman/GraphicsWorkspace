@@ -95,7 +95,6 @@ public class WorldModel {
 			Vector3f c2 = new Vector3f(0,1f,0); 
 			return c1.mul((float)(imageWidth-1-x)/(imageWidth-1)).add(c2.mul((float)x/(imageWidth-1)));		
 		} else {
-
 			Vector3f pixelDirection = calcPixelDirection(x, y, imageWidth, imageHeight, model.fovXdegree);
 			Vector3f rayTrace = rayTracing(new Vector3f(), pixelDirection, model, skyBoxImageSphereTexture, 0);
 			return rayTrace;		
@@ -111,8 +110,25 @@ public class WorldModel {
 	 * @return The calculated color for the pixel based on ray tracing and lighting effects. */	
 	private static Vector3f rayTracing(Vector3f incidentRayOrigin, Vector3f incidentRayDirection, Model model,
 			SphereTexture skyBoxImageSphereTexture, int depthLevel) {
+		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin,incidentRayDirection,model.spheres.get(0));
+		if(intersectionResults == null)
+			return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
+//		3.1
+		ModelSphere intersectedSphere = intersectionResults.intersectedSphere;
+		ModelMaterial intersectedSphereMaterial = model.materials.get(intersectedSphere.materialIndex);
+		Vector3f intersectionPoint = intersectionResults.intersectionPoint;
+		Vector3f intersectionNormal = intersectionResults.normal;
+		boolean intersectionFromOutsideOfSphere = intersectionResults.rayFromOutsideOfSphere;
+		SphereTexture intersectedSphereTexture = model.skyBoxImageSphereTextures .get(intersectedSphere.textureIndex);
+		//return new Vector3f(0);
 		
-		return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
+//		3.2
+		Vector3f color = intersectedSphereMaterial.color;
+		float kColor = intersectedSphereMaterial.kColor;
+		return new Vector3f(color.mul(kColor));
+		
+//		3.3
+		
 	}
 
 	
@@ -125,12 +141,12 @@ public class WorldModel {
 	 * @return The normalized direction vector of the ray for the given pixel. */	
 	static Vector3f calcPixelDirection(int x, int y, int imageWidth, int imageHeight, float fovXdegree) {	
 		double fovXradian = Math.toRadians(fovXdegree);
-		double fovYradian = Math.toRadians(fovXdegree / (imageWidth * imageHeight));
+		double fovYradian = Math.toRadians(fovXdegree * imageHeight / imageWidth );
 		float xLeft = (float) (-Math.tan(fovXradian / 2));
-		float xDelta = (float) (2 * Math.tan(fovXradian / 2) / imageWidth - 1f);
+		float xDelta = (float) (2 * Math.tan(fovXradian / 2) / (imageWidth - 1f));
 		float yBottom = (float) (-Math.tan(fovYradian / 2));
-		float yDelta = (float) (2 * Math.tan(fovYradian / 2) / imageHeight -1f);
-		return new Vector3f(xLeft + x * xDelta, yBottom + y * yDelta, -1).normalize();
+		float yDelta = (float) (2 * Math.tan(fovYradian / 2) / (imageHeight -1f));
+		return new Vector3f(xLeft + x*xDelta, yBottom + y*yDelta, -1).normalize();
 	}
 
 	/** Calculates the intersection(s) between a ray and a sphere.
@@ -195,7 +211,12 @@ public class WorldModel {
 	 *         or an empty IntersectionResults object if no intersection occurs. */	
 	private static IntersectionResults rayIntersection(Vector3f rayStart, Vector3f rayDirection,
 			List<ModelSphere> spheres) {
-
+		IntersectionResults intersectionResults;
+		for (ModelSphere sphere:spheres) {
+			intersectionResults = rayIntersection(rayStart,rayDirection,sphere);
+			if(intersectionResults != null)
+				return intersectionResults;
+		}
 		return null;
 	}
 

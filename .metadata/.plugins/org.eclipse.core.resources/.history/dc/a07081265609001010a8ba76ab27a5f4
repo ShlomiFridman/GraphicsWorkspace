@@ -177,7 +177,7 @@ public class WorldModel {
 		// If the distance from the closest point to the sphere center is greater than
 		// the sphere radius,
 		// then there are no intersection points
-		if (pmDistance > sphereRadius)
+		if (pmDistance < sphereRadius)
 			return null;
 
 		// Calculate the distance along the line from the closest point to the

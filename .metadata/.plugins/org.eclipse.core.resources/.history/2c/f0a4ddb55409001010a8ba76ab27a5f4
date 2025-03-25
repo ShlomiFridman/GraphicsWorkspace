@@ -212,8 +212,8 @@ public class WorldModel {
 	private static IntersectionResults rayIntersection(Vector3f rayStart, Vector3f rayDirection,
 			List<ModelSphere> spheres) {
 		IntersectionResults intersectionResults;
-		for (ModelSphere sphere:spheres) {
-			intersectionResults = rayIntersection(rayStart,rayDirection,sphere);
+		for (int i = 0; i < spheres.size() - 1; i++) {
+			intersectionResults = rayIntersection(rayStart,rayDirection,spheres.get(i));
 			if(intersectionResults != null)
 				return intersectionResults;
 		}
