@@ -157,7 +157,13 @@ public class WorldModel {
 		Vector3f color = new Vector3f(intersectedSphereMaterial.color);
 		float kColor = intersectedSphereMaterial.kColor;
 		
-		Vector3f returnedColor = color.mul(kColor);
+		// get lighting vec
+		Vector3f lighting = lightingEquation(intersectionPoint, intersectionNormal,
+				model.lights.get(0).location,intersectedSphereMaterial.kd,
+				intersectedSphereMaterial.ks, intersectedSphereMaterial.ka,
+				intersectedSphereMaterial.shininess);
+		
+		Vector3f returnedColor = color.mul(kColor).add(lighting);
 		return returnedColor;
 	}
 
@@ -273,8 +279,12 @@ public class WorldModel {
 	 * @return The calculated lighting as a Vector3f representing color. */	
 	static Vector3f lightingEquation(Vector3f point, Vector3f PointNormal, Vector3f LightPos, Vector3f Kd,
 			Vector3f Ks, Vector3f Ka, float shininess) {
-
-		Vector3f returnedColor = new Vector3f();
+		
+		// get the dot product of N dot L
+		float n_dot_l = new Vector3f(PointNormal).dot(new Vector3f(LightPos).sub(point).normalize());
+		
+		// I_l = 1
+		Vector3f returnedColor = new Vector3f(Kd).mul(Math.max(0f, n_dot_l));
 
 		return returnedColor;
 	}

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <parameters>
-    <modelFileName>.\Models\ex_03_3_FewSpheres_simpleColors.model</modelFileName>
+    <modelFileName>.\Models\ex_04___4SpheresFromFewMaterialsDirectLight.model</modelFileName>
     <saveImagePath>./</saveImagePath>
     <depthOfRayTracing>6</depthOfRayTracing>
-    <exercise>EX_3_4_Intersection_Finding_the_nearest_sphere</exercise>
+    <exercise>EX_4_1_Lighting_Diffusive</exercise>
 </parameters>
