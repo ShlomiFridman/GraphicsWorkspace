@@ -3,5 +3,5 @@
     <modelFileName>.\Models\ex_04___4SpheresFromFewMaterialsDirectLight.model</modelFileName>
     <saveImagePath>./</saveImagePath>
     <depthOfRayTracing>6</depthOfRayTracing>
-    <exercise>EX_4_1_Lighting_Diffusive</exercise>
+    <exercise>EX_5___Texture</exercise>
 </parameters>
