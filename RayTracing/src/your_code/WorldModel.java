@@ -129,9 +129,30 @@ public class WorldModel {
 //		3.2
 		Vector3f color = intersectedSphereMaterial.color;
 		float kColor = intersectedSphereMaterial.kColor;
-		return new Vector3f(color.mul(kColor));
+		Vector3f res = new Vector3f(color).mul(kColor);
+//		return res;
 		
+//		5
+		Vector3f newKd = new Vector3f(calcKdCombinedWithTexture(
+				intersectionPoint,
+				intersectedSphere.center,
+				intersectedSphereTexture,
+				intersectedSphereMaterial.kd,
+				intersectedSphereMaterial.kTexture));
 		
+//		4
+	    Vector3f lighting = lightingEquation(
+	            intersectionPoint, 
+	            intersectionNormal, 
+	            model.lights.get(0).location, 
+	            newKd, 
+	            intersectedSphereMaterial.ks, 
+	            intersectedSphereMaterial.ka, 
+	            intersectedSphereMaterial.shininess
+	    ).mul(intersectedSphereMaterial.kDirect);
+	    
+	    res.add(lighting);
+	    return res;
 	}
 
 	
@@ -224,9 +245,6 @@ public class WorldModel {
 	        }
 	    }
 
-	    if (closestIntersection != null) {
-	        closestIntersection.intersectionPoint.z = -closestIntersection.intersectionPoint.z;
-	    }
 	    
 	    return closestIntersection;
 	}
@@ -245,9 +263,23 @@ public class WorldModel {
 	static Vector3f lightingEquation(Vector3f point, Vector3f PointNormal, Vector3f LightPos, Vector3f Kd,
 			Vector3f Ks, Vector3f Ka, float shininess) {
 
-		Vector3f returnedColor = new Vector3f();
-
-		return returnedColor;
+//		4.1
+		Vector3f L = new Vector3f(LightPos).sub(point).normalize();
+	    Vector3f N = new Vector3f(PointNormal).normalize();
+	    float NDotL = Math.max(0f, L.dot(N));
+	    Vector3f returnedColor = new Vector3f(Kd).mul(NDotL);
+	    
+//	    4.2
+	    returnedColor.add(Ka);
+	    
+//	    4.3
+	    Vector3f R = new Vector3f(N).mul(2f*NDotL).sub(L).normalize();
+	    Vector3f V = new Vector3f(0).sub(point).normalize();
+	    float RDotV = R.dot(V);
+	    if(NDotL > 0)
+	    	returnedColor.add(new Vector3f(Ks).mul((float) Math.pow(Math.max(0, RDotV),shininess)));
+	    return returnedColor;
+	    
 	}
 
 
@@ -270,7 +302,10 @@ public class WorldModel {
 			Vector3f intersectedSphereKd,
 			float kTexture) {
 
-		return null;
+		Vector3f V = new Vector3f(intersectionPoint).sub(intersectedSphereCenter).normalize();
+		Vector3f textureColor = intersectedSphereTexture.sampleDirectionFromMiddle(V);
+		Vector3f kDiffuseTexture = intersectedSphereKd.mul(1-kTexture).add(textureColor.mul(kTexture));  
+		return kDiffuseTexture;
 	}	
 
 
