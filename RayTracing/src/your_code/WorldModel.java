@@ -157,9 +157,16 @@ public class WorldModel {
 		Vector3f color = new Vector3f(intersectedSphereMaterial.color);
 		float kColor = intersectedSphereMaterial.kColor;
 		
+		Vector3f newKd = calcKdCombinedWithTexture(
+				intersectionPoint,
+				intersectedSphere.center,
+				intersectedSphereTexture,
+				intersectedSphereMaterial.kd,
+				intersectedSphereMaterial.kTexture);
+		
 		// get lighting vec
 		Vector3f lighting = lightingEquation(intersectionPoint, intersectionNormal,
-				model.lights.get(0).location,intersectedSphereMaterial.kd,
+				model.lights.get(0).location, newKd,
 				intersectedSphereMaterial.ks, intersectedSphereMaterial.ka,
 				intersectedSphereMaterial.shininess);
 		
@@ -316,8 +323,15 @@ public class WorldModel {
 			SphereTexture intersectedSphereTexture,
 			Vector3f intersectedSphereKd,
 			float kTexture) {
+		Vector3f directionFromCenter = new Vector3f(intersectionPoint).
+				sub(intersectedSphereCenter).normalize();
+		Vector3f textureAtPoint = intersectedSphereTexture.sampleDirectionFromMiddle(directionFromCenter);
+		
+		Vector3f Kd = new Vector3f(intersectedSphereKd);
+		Vector3f newKd = Kd.mul(1f - kTexture).add(textureAtPoint.mul(kTexture));
+		
 
-		return null;
+		return newKd;
 	}	
 
 
