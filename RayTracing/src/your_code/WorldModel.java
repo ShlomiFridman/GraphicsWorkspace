@@ -304,7 +304,7 @@ public class WorldModel {
 
 		Vector3f V = new Vector3f(intersectionPoint).sub(intersectedSphereCenter).normalize();
 		Vector3f textureColor = intersectedSphereTexture.sampleDirectionFromMiddle(V);
-		Vector3f kDiffuseTexture = intersectedSphereKd.mul(1-kTexture).add(textureColor.mul(kTexture));  
+		Vector3f kDiffuseTexture = new Vector3f(intersectedSphereKd).mul(1-kTexture).add(textureColor.mul(kTexture));  
 		return kDiffuseTexture;
 	}	
 
