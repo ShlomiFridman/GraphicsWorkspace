@@ -135,44 +135,66 @@ public class WorldModel {
 	 * @return The calculated color for the pixel based on ray tracing and lighting effects. */	
 	private static Vector3f rayTracing(Vector3f incidentRayOrigin, Vector3f incidentRayDirection, Model model,
 			SphereTexture skyBoxImageSphereTexture, int depthLevel) {
-
-		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin, incidentRayDirection, model.spheres);
-//		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin, incidentRayDirection, model.spheres.get(0));
 		
-		// if no intersection, return the skyBox
-		if (intersectionResults == null)
+		if(depthLevel == depthOfRayTracing)
+			return new Vector3f(0);
+		IntersectionResults intersectionResults = rayIntersection(incidentRayOrigin,incidentRayDirection,model.spheres);
+		if(intersectionResults == null)
 			return skyBoxImageSphereTexture.sampleDirectionFromMiddle(incidentRayDirection);
-		
-		
+//		3.1
 		ModelSphere intersectedSphere = intersectionResults.intersectedSphere;
-		ModelMaterial intersectedSphereMaterial =
-				model.materials.get(intersectedSphere.materialIndex);
+		ModelMaterial intersectedSphereMaterial = model.materials.get(intersectedSphere.materialIndex);
 		Vector3f intersectionPoint = intersectionResults.intersectionPoint;
 		Vector3f intersectionNormal = intersectionResults.normal;
-		boolean intersectionFromOutsideOfSphere =
-		intersectionResults.rayFromOutsideOfSphere;
-		SphereTexture intersectedSphereTexture = model.skyBoxImageSphereTextures
-				.get(intersectedSphere.textureIndex);
+		boolean intersectionFromOutsideOfSphere = intersectionResults.rayFromOutsideOfSphere;
+		SphereTexture intersectedSphereTexture = model.skyBoxImageSphereTextures .get(intersectedSphere.textureIndex);
+		//return new Vector3f(0);
 		
-		Vector3f color = new Vector3f(intersectedSphereMaterial.color);
+//		3.2
+		Vector3f color = intersectedSphereMaterial.color;
 		float kColor = intersectedSphereMaterial.kColor;
+		Vector3f res = new Vector3f(color).mul(kColor);
+//		return res;
 		
-		Vector3f newKd = calcKdCombinedWithTexture(
+//		6
+		Boolean inShadow = isPointInShadow(model.lights.get(0).location,intersectionPoint,intersectionNormal,model);
+
+		
+		
+//		5
+		Vector3f newKd = new Vector3f(calcKdCombinedWithTexture(
 				intersectionPoint,
 				intersectedSphere.center,
 				intersectedSphereTexture,
 				intersectedSphereMaterial.kd,
-				intersectedSphereMaterial.kTexture);
+				intersectedSphereMaterial.kTexture));
 		
-		// get lighting vec
-		Vector3f lighting = lightingEquation(intersectionPoint, intersectionNormal,
-				model.lights.get(0).location, newKd,
-				intersectedSphereMaterial.ks, intersectedSphereMaterial.ka,
-				intersectedSphereMaterial.shininess);
+//		4
+		Vector3f lighting;
+		if(inShadow) 
+		    lighting = new Vector3f(intersectedSphereMaterial.ka);
+		else {
+			    lighting = lightingEquation(
+		            intersectionPoint, 
+		            intersectionNormal, 
+		            model.lights.get(0).location, 
+		            newKd, 
+		            intersectedSphereMaterial.ks, 
+		            intersectedSphereMaterial.ka, 
+		            intersectedSphereMaterial.shininess);
+		}
 		
-		Vector3f returnedColor = color.mul(kColor)
-				.add(new Vector3f(intersectedSphereMaterial.kDirect).mul(lighting));
-		return returnedColor;
+		lighting.mul(intersectedSphereMaterial.kDirect);
+	    res.add(lighting);
+	    
+//	    7
+	    Vector3f Reflected = calcReflectedLight(incidentRayDirection, intersectionPoint, intersectionNormal, model, skyBoxImageSphereTexture, depthLevel);
+	    res.add(new Vector3f(Reflected).mul(intersectedSphereMaterial.kReflection));
+	    
+//	    8
+	    Vector3f transmisiion =  calcTransmissionLight(incidentRayDirection, intersectionPoint, intersectionNormal, intersectionFromOutsideOfSphere,
+	    		intersectedSphereMaterial.refractiveIndex, model, skyBoxImageSphereTexture, depthLevel);
+	    return res.add(new Vector3f(transmisiion).mul(intersectedSphereMaterial.kTransmission));
 	}
 
 	
@@ -255,24 +277,19 @@ public class WorldModel {
 	 *         or an empty IntersectionResults object if no intersection occurs. */	
 	private static IntersectionResults rayIntersection(Vector3f rayStart, Vector3f rayDirection,
 			List<ModelSphere> spheres) {
+	    IntersectionResults closestIntersection = null;
+	    float maxZ = Float.NEGATIVE_INFINITY;
 
-		ArrayList<IntersectionResults> intersectionResultsList = new ArrayList<>();
-		for (ModelSphere sphere : spheres) {
-			IntersectionResults tmp_result = rayIntersection(rayStart, rayDirection, sphere);
-			if (tmp_result != null)
-				intersectionResultsList.add(tmp_result);
-		}
-		
-		if (intersectionResultsList.isEmpty())
-			return null;
-		
-		intersectionResultsList.sort((res1, res2)->{
-			Vector3f p1 = res1.intersectedSphere.center;
-			Vector3f p2 = res2.intersectedSphere.center;
-			return (int) (p2.z - p1.z);
-		});
-		
-		return intersectionResultsList.get(0);
+	    for (ModelSphere sphere : spheres) {
+	        IntersectionResults intersection = rayIntersection(rayStart, rayDirection, sphere);
+	        if (intersection != null && intersection.intersectionPoint.z > maxZ) {
+	            maxZ = intersection.intersectionPoint.z;
+	            closestIntersection = intersection;
+	        }
+	    }
+
+	    
+	    return closestIntersection;
 	}
 
 	
@@ -353,8 +370,14 @@ public class WorldModel {
 			Vector3f point,
 			Vector3f pointNormal,
 			Model model) {
+		
+		Vector3f newPoint = new Vector3f(point)
+				.add(new Vector3f(pointNormal).mul(0.01f));
+		Vector3f lightDirVec = new Vector3f(lightLocation).sub(point).normalize();
+		
+		IntersectionResults intersectionResults = rayIntersection(newPoint, lightDirVec, model.spheres);
 				
-		return false;
+		return intersectionResults != null;
 	}	
 
 	
@@ -381,8 +404,14 @@ public class WorldModel {
 	                                   Model model, 
 	                                   SphereTexture skyBoxImageSphereTexture, 
 	                                   int depthLevel) {
-										   
-		return null;
+
+	    Vector3f D = new Vector3f(incidentRayDirection).normalize();
+	    Vector3f N = new Vector3f(intersectionNormal).normalize();
+	    Vector3f reflectedDir = new Vector3f(D).sub(new Vector3f(N).mul(2f * D.dot(N))).normalize();
+
+	    Vector3f reflectedOrigin = new Vector3f(intersectionPoint).add(new Vector3f(N).mul(0.01f)); // Avoid self-intersection
+
+	    return rayTracing(reflectedOrigin, reflectedDir, model, skyBoxImageSphereTexture, depthLevel + 1);
 	}
 
 	
@@ -417,8 +446,14 @@ public class WorldModel {
 	                                      Model model, 
 	                                      SphereTexture skyBoxImageSphereTexture, 
 	                                      int depthLevel) {
-											  
-		return null;
+
+		Vector3f Tray = YoursUtilities.calcTransmissionRay(incidentRayDirection, intersectionNormal, refractiveIndexIntersectedSphere, intersectionFromOutsideOfSphere);
+		Vector3f p = new Vector3f(intersectionPoint);
+		if(intersectionFromOutsideOfSphere)
+			p.sub(new Vector3f(intersectionNormal).mul(0.01f));
+		else
+			p.add(new Vector3f(intersectionNormal).mul(0.01f));
+		return rayTracing(p, Tray, model, skyBoxImageSphereTexture, depthLevel+1);
 	}
 }
 
