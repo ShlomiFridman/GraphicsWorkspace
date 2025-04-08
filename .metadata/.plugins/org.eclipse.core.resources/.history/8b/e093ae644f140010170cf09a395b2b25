@@ -266,7 +266,6 @@ public class UnitTests {
 		System.out.println("=========================");
 	    testcalcKdCombinedWithTexture();
 	    
-//	    our tests
 	    System.out.println("\nVector tests");
 	    System.out.println("=========================");
 	    testLightingEquation_Vector();

@@ -284,7 +284,7 @@ public class WorldModel {
 			Vector3f Ks, Vector3f Ka, float shininess) {
 
 //		4.1
-		Vector3f L = LightPos.sub(point).normalize();
+		Vector3f L = new Vector3f(LightPos).sub(point).normalize();
 	    Vector3f N = new Vector3f(PointNormal).normalize();
 	    float NDotL = Math.max(0f, L.dot(N));
 	    Vector3f returnedColor = new Vector3f(Kd).mul(NDotL);

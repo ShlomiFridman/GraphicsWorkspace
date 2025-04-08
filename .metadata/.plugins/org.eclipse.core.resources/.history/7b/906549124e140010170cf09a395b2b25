@@ -206,7 +206,7 @@ public class UnitTests {
 	    }
 	}
 	
-	private static void testLightingEquation_Vector() {
+	private static void testlightingEquation_Vector() {
 		Vector3f expected = new Vector3f(1, 2, 3);
 		Vector3f[] vectors = {
 		    new Vector3f(1, 2, 3),
@@ -224,27 +224,7 @@ public class UnitTests {
 		        return;
 		    }
 		}
-		System.out.println("lightingEquation test passed");
-	}
-	
-	private static void testCalcKdCombinedWithTexture_Vector() throws IOException {
-		Vector3f expected = new Vector3f(1, 2, 3);
-		Vector3f[] vectors = {
-		    new Vector3f(1, 2, 3),
-		    new Vector3f(1, 2, 3),
-		    new Vector3f(1, 2, 3),
-		};
-
-		SphereTexture intersectedSphereTexture;
-		intersectedSphereTexture = new SphereTexture("./Models/DefaultSkyBoxImage.jpg");
-		WorldModel.calcKdCombinedWithTexture(vectors[0], vectors[1], intersectedSphereTexture, vectors[2], 0.23f);
-		for (int i = 0; i < vectors.length; i++) {
-		    if (!vectors[i].equals(expected)) {
-		        System.out.println("At least one of calcKdCombinedWithTexture input vector has changed");
-		        return;
-		    }
-		}
-		System.out.println("calcKdCombinedWithTexture test passed");
+		System.out.println("Test passed");
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -266,10 +246,8 @@ public class UnitTests {
 		System.out.println("=========================");
 	    testcalcKdCombinedWithTexture();
 	    
-//	    our tests
 	    System.out.println("\nVector tests");
 	    System.out.println("=========================");
-	    testLightingEquation_Vector();
-	    testCalcKdCombinedWithTexture_Vector();
+	    testlightingEquation_Vector();
 	}
 }

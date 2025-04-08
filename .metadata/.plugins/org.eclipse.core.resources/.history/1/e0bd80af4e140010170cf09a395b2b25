@@ -244,7 +244,7 @@ public class UnitTests {
 		        return;
 		    }
 		}
-		System.out.println("calcKdCombinedWithTexture test passed");
+		System.out.println("lightingEquation test passed");
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -266,7 +266,6 @@ public class UnitTests {
 		System.out.println("=========================");
 	    testcalcKdCombinedWithTexture();
 	    
-//	    our tests
 	    System.out.println("\nVector tests");
 	    System.out.println("=========================");
 	    testLightingEquation_Vector();

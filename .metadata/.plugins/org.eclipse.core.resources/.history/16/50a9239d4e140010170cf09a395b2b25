@@ -237,14 +237,14 @@ public class UnitTests {
 
 		SphereTexture intersectedSphereTexture;
 		intersectedSphereTexture = new SphereTexture("./Models/DefaultSkyBoxImage.jpg");
-		WorldModel.calcKdCombinedWithTexture(vectors[0], vectors[1], intersectedSphereTexture, vectors[2], 0.23f);
+		WorldModel.calcKdCombinedWithTexture(vectors[0], vectors[1], null, vectors[2], 0);
 		for (int i = 0; i < vectors.length; i++) {
 		    if (!vectors[i].equals(expected)) {
-		        System.out.println("At least one of calcKdCombinedWithTexture input vector has changed");
+		        System.out.println("At least one of lightingEquation input vector has changed");
 		        return;
 		    }
 		}
-		System.out.println("calcKdCombinedWithTexture test passed");
+		System.out.println("lightingEquation test passed");
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -266,7 +266,6 @@ public class UnitTests {
 		System.out.println("=========================");
 	    testcalcKdCombinedWithTexture();
 	    
-//	    our tests
 	    System.out.println("\nVector tests");
 	    System.out.println("=========================");
 	    testLightingEquation_Vector();
