@@ -227,17 +227,18 @@ public class UnitTests {
 	}
 	
 	private static void testCalcKdCombinedWithTexture_Vector() throws IOException {
+		Vector3f expected = new Vector3f(1, 2, 3);
 		Vector3f[] vectors = {
-			    new Vector3f(1),
-			    new Vector3f(2),
-			    new Vector3f(3)
+		    new Vector3f(1, 2, 3),
+		    new Vector3f(1, 2, 3),
+		    new Vector3f(1, 2, 3),
 		};
 
 		SphereTexture intersectedSphereTexture;
 		intersectedSphereTexture = new SphereTexture("./Models/DefaultSkyBoxImage.jpg");
 		WorldModel.calcKdCombinedWithTexture(vectors[0], vectors[1], intersectedSphereTexture, vectors[2], 0.23f);
 		for (int i = 0; i < vectors.length; i++) {
-		    if (!vectors[i].equals(new Vector3f(i+1))) {
+		    if (!vectors[i].equals(expected)) {
 		        System.out.println("At least one of calcKdCombinedWithTexture input vector has changed");
 		        return;
 		    }
