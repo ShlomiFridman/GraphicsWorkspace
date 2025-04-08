@@ -163,16 +163,16 @@ public class WorldModel {
 		}
 		
 		lighting.mul(intersectedSphereMaterial.kDirect);
-	    res.add(lighting);
+	    return res.add(lighting);
 	    
 //	    7
-	    Vector3f Reflected = calcReflectedLight(incidentRayDirection, intersectionPoint, intersectionNormal, model, skyBoxImageSphereTexture, depthLevel);
-	    res.add(new Vector3f(Reflected).mul(intersectedSphereMaterial.kReflection));
-	    
-//	    8
-	    Vector3f transmisiion =  calcTransmissionLight(incidentRayDirection, intersectionPoint, intersectionNormal, intersectionFromOutsideOfSphere,
-	    		intersectedSphereMaterial.refractiveIndex, model, skyBoxImageSphereTexture, depthLevel);
-	    return res.add(new Vector3f(transmisiion).mul(intersectedSphereMaterial.kTransmission));
+//	    Vector3f Reflected = calcReflectedLight(incidentRayDirection, intersectionPoint, intersectionNormal, model, skyBoxImageSphereTexture, depthLevel);
+//	    res.add(new Vector3f(Reflected).mul(intersectedSphereMaterial.kReflection));
+//	    
+////	    8
+//	    Vector3f transmisiion =  calcTransmissionLight(incidentRayDirection, intersectionPoint, intersectionNormal, intersectionFromOutsideOfSphere,
+//	    		intersectedSphereMaterial.refractiveIndex, model, skyBoxImageSphereTexture, depthLevel);
+//	    return res.add(new Vector3f(transmisiion).mul(intersectedSphereMaterial.kTransmission));
 	}
 
 	

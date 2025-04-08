@@ -427,7 +427,7 @@ public class WorldModel {
 			p.sub(new Vector3f(intersectionNormal).mul(0.01f));
 		else
 			p.add(new Vector3f(intersectionNormal).mul(0.01f));
-		return rayTracing(p, Tray, model, skyBoxImageSphereTexture, depthLevel+1);
+		return rayTracing(p, incidentRayDirection, model, skyBoxImageSphereTexture, depthLevel+1);
 	}
 }
 
