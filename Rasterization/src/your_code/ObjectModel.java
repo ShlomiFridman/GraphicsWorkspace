@@ -177,6 +177,9 @@ public class ObjectModel {
 
 
 		if (worldModel.displayType == DisplayTypeEnum.FACE_EDGES) {
+			drawLineDDA(intBufferWrapper,vertex1.pointObjectCoordinates,vertex2.pointObjectCoordinates,1f,1f,1f);
+			drawLineDDA(intBufferWrapper,vertex1.pointObjectCoordinates,vertex3.pointObjectCoordinates,1f,1f,1f);
+			drawLineDDA(intBufferWrapper,vertex2.pointObjectCoordinates,vertex3.pointObjectCoordinates,1f,1f,1f);
 			
 
 		} else {
@@ -204,11 +207,29 @@ public class ObjectModel {
 	
 
 	static void drawLineDDA(IntBufferWrapper intBufferWrapper, Vector3f p1, Vector3f p2, float r, float g, float b) {
-		int x1round = Math.round(p1.x);
-		int y1round = Math.round(p1.y);
-		int x2round = Math.round(p2.x);
-		int y2round = Math.round(p2.y);
+		int x1 = Math.round(p1.x);
+		int y1 = Math.round(p1.y);
+		int x2 = Math.round(p2.x);
+		int y2 = Math.round(p2.y);
 
+		int dx = x2 - x1;
+		int dy = y2 - y1;
+
+		int steps = Math.max(Math.abs(dx), Math.abs(dy));
+		if (steps == 0)
+			return;
+
+		float xInc = dx / (float) steps;
+		float yInc = dy / (float) steps;
+
+		float x = x1;
+		float y = y1;
+
+		for (int i = 0; i <= steps; i++) {
+			intBufferWrapper.setPixel(Math.round(x), Math.round(y), new Vector3f(r, g, b));
+			x += xInc;
+			y += yInc;
+		}
 		
 	}
 
