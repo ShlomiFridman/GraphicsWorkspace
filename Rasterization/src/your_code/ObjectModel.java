@@ -37,9 +37,9 @@ public class ObjectModel {
 	private Vector3f boundingBoxCenter;
 
 	private Vector3f lightPositionEyeCoordinates = new Vector3f();
-	
+
 	public static ExerciseEnum exercise = ExerciseEnum.EX_9___Lighting;
-	
+
 	public ObjectModel(WorldModel worldModel, int imageWidth, int imageHeight) {
 		this.worldModel = worldModel;
 		this.imageWidth = imageWidth;
@@ -53,7 +53,7 @@ public class ObjectModel {
 		this.projectionM.identity();
 		this.viewportM.identity();
 	}
-	
+
 	void setModelM(Matrix4f modelM) {
 		this.modelM = modelM;
 	}
@@ -89,11 +89,11 @@ public class ObjectModel {
 			textureImageIntBufferWrapper = objLoader.getTextureImageIntBufferWrapper();
 			return true;
 		} catch (IOException e) {
-			//System.err.println("Failed to load the OBJ file.");
+			// System.err.println("Failed to load the OBJ file.");
 			return false;
 		}
 	}
-	
+
 	public boolean objectHasTexture() {
 		return textureImageIntBufferWrapper != null;
 	}
@@ -101,42 +101,36 @@ public class ObjectModel {
 	public void render(IntBufferWrapper intBufferWrapper) {
 		exercise = worldModel.exercise;
 
-		
 		if (verticesData != null) {
 			for (VertexData vertexData : verticesData) {
 				vertexProcessing(intBufferWrapper, vertexData);
 			}
 			for (TriangleFace face : faces) {
-				rasterization(intBufferWrapper,	
-						verticesData.get(face.indices[0]), 
-						verticesData.get(face.indices[1]), 
-						verticesData.get(face.indices[2]), 
-						face.color);
+				rasterization(intBufferWrapper, verticesData.get(face.indices[0]), verticesData.get(face.indices[1]),
+						verticesData.get(face.indices[2]), face.color);
 			}
 		}
 	}
 
 	private void vertexProcessing(IntBufferWrapper intBufferWrapper, VertexData vertex) {
 
+		// Initialize a 4D vector from the 3D vertex point
+		Vector4f t = new Vector4f(vertex.pointObjectCoordinates, 1f);
 
-			// Initialize a 4D vector from the 3D vertex point
-			Vector4f t = new Vector4f(vertex.pointObjectCoordinates, 1f);
-	
-			// Transform only model transformation
-			modelM.transform(t);
-			vertex.pointEyeCoordinates = new Vector3f(t.x, t.y, t.z);
-			
-			vertex.pointWindowCoordinates = new Vector3f(t.x, t.y, t.z);
+		// Transform only model transformation
+		modelM.transform(t);
+		vertex.pointEyeCoordinates = new Vector3f(t.x, t.y, t.z);
 
+		vertex.pointWindowCoordinates = new Vector3f(t.x, t.y, t.z);
 
 		// transformation normal from object coordinates to eye coordinates v->normal
 		///////////////////////////////////////////////////////////////////////////////////
 		transformNormalFromObjectCoordToEyeCoordAndDrawIt(intBufferWrapper, vertex);
 
-
 	}
 
-	private void transformNormalFromObjectCoordToEyeCoordAndDrawIt(IntBufferWrapper intBufferWrapper, VertexData vertex) {
+	private void transformNormalFromObjectCoordToEyeCoordAndDrawIt(IntBufferWrapper intBufferWrapper,
+			VertexData vertex) {
 		// transformation normal from object coordinates to eye coordinates v->normal
 		///////////////////////////////////////////////////////////////////////////////////
 		// --> v->NormalEyeCoordinates
@@ -148,8 +142,7 @@ public class ObjectModel {
 		if (worldModel.displayNormals) {
 			// drawing normals
 			Vector3f t1 = new Vector3f(vertex.normalEyeCoordinates);
-			Vector4f point_plusNormal_eyeCoordinates = new Vector4f(t1.mul(0.1f).add(vertex.pointEyeCoordinates),
-					1);
+			Vector4f point_plusNormal_eyeCoordinates = new Vector4f(t1.mul(0.1f).add(vertex.pointEyeCoordinates), 1);
 			Vector4f t2 = new Vector4f(point_plusNormal_eyeCoordinates);
 			// modelviewM.transform(t2);
 			projectionM.transform(t2);
@@ -162,36 +155,57 @@ public class ObjectModel {
 			Vector3f point_plusNormal_screen = new Vector3f(t2.x, t2.y, t2.z);
 			drawLineDDA(intBufferWrapper, vertex.pointWindowCoordinates, point_plusNormal_screen, 0, 0, 1f);
 		}
-		
+
 	}
-	
-	
-	private void rasterization(IntBufferWrapper intBufferWrapper, VertexData vertex1, VertexData vertex2, VertexData vertex3, Vector3f faceColor) {
+
+	private void rasterization(IntBufferWrapper intBufferWrapper, VertexData vertex1, VertexData vertex2,
+			VertexData vertex3, Vector3f faceColor) {
 
 		Vector3f faceNormal = new Vector3f(vertex2.pointEyeCoordinates).sub(vertex1.pointEyeCoordinates)
-					.cross(new Vector3f(vertex3.pointEyeCoordinates).sub(vertex1.pointEyeCoordinates))
-					.normalize();
-		
-
-			
-
+				.cross(new Vector3f(vertex3.pointEyeCoordinates).sub(vertex1.pointEyeCoordinates)).normalize();
 
 		if (worldModel.displayType == DisplayTypeEnum.FACE_EDGES) {
-			drawLineDDA(intBufferWrapper,vertex1.pointObjectCoordinates,vertex2.pointObjectCoordinates,1f,1f,1f);
-			drawLineDDA(intBufferWrapper,vertex1.pointObjectCoordinates,vertex3.pointObjectCoordinates,1f,1f,1f);
-			drawLineDDA(intBufferWrapper,vertex2.pointObjectCoordinates,vertex3.pointObjectCoordinates,1f,1f,1f);
+			drawLineDDA(intBufferWrapper, vertex1.pointObjectCoordinates, vertex2.pointObjectCoordinates, 1f, 1f, 1f);
+			drawLineDDA(intBufferWrapper, vertex1.pointObjectCoordinates, vertex3.pointObjectCoordinates, 1f, 1f, 1f);
+			drawLineDDA(intBufferWrapper, vertex2.pointObjectCoordinates, vertex3.pointObjectCoordinates, 1f, 1f, 1f);
 
 		} else {
+			Vector3f p1 = vertex1.pointObjectCoordinates;
+			Vector3f p2 = vertex2.pointObjectCoordinates;
+			Vector3f p3 = vertex3.pointObjectCoordinates;
 
+			Vector4i boundingBox = calcBoundingBox(p1, p2, p3,imageWidth,
+					imageHeight);
+			BarycentricCoordinates bc = new BarycentricCoordinates(p1, p2, p3);
 
+			for (int y = boundingBox.z; y <= boundingBox.w; y++) {
+				for (int x = boundingBox.x; x <= boundingBox.y; x++) {
+					bc.calcCoordinatesForPoint(x, y);
+					if (bc.isPointInside()) {
+						FragmentData fragmentData = new FragmentData();
+						if (worldModel.displayType == DisplayTypeEnum.FACE_COLOR) {
+							fragmentData.pixelColor = new Vector3f(faceColor);
+						} else if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {
+						} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_FLAT) {
+						} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_GOURARD) {
+						} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_PHONG) {
+						} else if (worldModel.displayType == DisplayTypeEnum.TEXTURE) {
+						} else if (worldModel.displayType == DisplayTypeEnum.TEXTURE_LIGHTING) {
+						}
+
+						Vector3f pixelColor = fragmentProcessing(fragmentData);
+						intBufferWrapper.setPixel(x, y, pixelColor);
+					}
+				}
+			}
 		}
-		
+
 	}
 
-
 	private Vector3f fragmentProcessing(FragmentData fragmentData) {
-		
+
 		if (worldModel.displayType == DisplayTypeEnum.FACE_COLOR) {
+			return fragmentData.pixelColor;
 		} else if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {
 		} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_FLAT) {
 		} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_GOURARD) {
@@ -200,10 +214,8 @@ public class ObjectModel {
 		} else if (worldModel.displayType == DisplayTypeEnum.TEXTURE_LIGHTING) {
 		}
 		return new Vector3f();
-		
-	}
 
-	
+	}
 
 	static void drawLineDDA(IntBufferWrapper intBufferWrapper, Vector3f p1, Vector3f p2, float r, float g, float b) {
 		int x1 = Math.round(p1.x);
@@ -231,32 +243,30 @@ public class ObjectModel {
 		}
 	}
 
+	static Vector4i calcBoundingBox(Vector3f p1, Vector3f p2, Vector3f p3, int imageWidth, int imageHeight) {
+		int minX, maxX, minY, maxY;
+		minX = (int) Math.max(0, Math.min(Math.min(p1.x, p2.x), p3.x));
+		maxX = Math.round(Math.min(imageWidth - 1, Math.max(Math.max(p1.x, p2.x), p3.x)));
+		minY = (int) Math.max(0, Math.min(Math.min(p1.y, p2.y), p3.y));
+		maxY = Math.round(Math.min(imageHeight - 1, Math.max(Math.max(p1.y, p2.y), p3.y)));
 
-
-
-	static Vector4i calcBoundingBox(Vector3f p1, Vector3f p2, Vector3f p3, int imageWidth, int imageHeight) { 
-
-		return new Vector4i();
+		return new Vector4i(minX, maxX, minY, maxY);
 
 	}
 
-	
-	float lightingEquation(Vector3f point, Vector3f PointNormal, Vector3f LightPos, float Kd, float Ks, float Ka, float shininess) {
+	float lightingEquation(Vector3f point, Vector3f PointNormal, Vector3f LightPos, float Kd, float Ks, float Ka,
+			float shininess) {
 
-		Vector3f color = lightingEquation(point, PointNormal, LightPos, 
-				                          new Vector3f(Kd), new Vector3f(Ks), new Vector3f(Ka), shininess);
+		Vector3f color = lightingEquation(point, PointNormal, LightPos, new Vector3f(Kd), new Vector3f(Ks),
+				new Vector3f(Ka), shininess);
 		return color.get(0);
 	}
-	
-	
+
 	private static Vector3f lightingEquation(Vector3f point, Vector3f PointNormal, Vector3f LightPos, Vector3f Kd,
 			Vector3f Ks, Vector3f Ka, float shininess) {
 
 		Vector3f returnedColor = new Vector3f();
 
-
 		return returnedColor;
-	}	
+	}
 }
-
-
