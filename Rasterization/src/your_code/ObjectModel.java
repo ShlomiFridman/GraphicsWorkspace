@@ -170,12 +170,6 @@ public class ObjectModel {
 					.normalize();
 		
 
-			intBufferWrapper.setPixel((int) vertex1.pointWindowCoordinates.x, (int) vertex1.pointWindowCoordinates.y, 1f, 1f, 1f);
-			intBufferWrapper.setPixel((int) vertex2.pointWindowCoordinates.x, (int) vertex2.pointWindowCoordinates.y, 1f, 1f, 1f);
-			intBufferWrapper.setPixel((int) vertex3.pointWindowCoordinates.x, (int) vertex3.pointWindowCoordinates.y, 1f, 1f, 1f);
-			
-
-
 		if (worldModel.displayType == DisplayTypeEnum.FACE_EDGES) {
 			drawLineDDA(intBufferWrapper,vertex1.pointObjectCoordinates,vertex2.pointObjectCoordinates,1f,1f,1f);
 			drawLineDDA(intBufferWrapper,vertex1.pointObjectCoordinates,vertex3.pointObjectCoordinates,1f,1f,1f);
@@ -183,7 +177,39 @@ public class ObjectModel {
 			
 
 		} else {
+			Vector3f p1 = new Vector3f(vertex1.pointObjectCoordinates);
+			Vector3f p2 = new Vector3f(vertex2.pointObjectCoordinates);
+			Vector3f p3 = new Vector3f(vertex3.pointObjectCoordinates);
+			
+			Vector4i boundingBox = calcBoundingBox(p1, p2, p3, imageWidth, imageHeight);
+			BarycentricCoordinates bc = new BarycentricCoordinates(p1, p2, p3);
+			
+			for (int y = boundingBox.z; y <= boundingBox.w; y++) {
+				for (int x = boundingBox.x; x <= boundingBox.y; x++) {
+					bc.calcCoordinatesForPoint(x, y);
+					if (bc.isPointInside()) {
+						FragmentData fragmentData = new FragmentData();
+						if (worldModel.displayType == DisplayTypeEnum.FACE_COLOR) {
+							fragmentData.pixelColor = new Vector3f(faceColor);
+						} else if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {
+							
+						} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_FLAT) {
+							
+						} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_GOURARD) {
+							
+						} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_PHONG) {
+							
+						} else if (worldModel.displayType == DisplayTypeEnum.TEXTURE) {
+							
+						} else if (worldModel.displayType == DisplayTypeEnum.TEXTURE_LIGHTING) {
+							
+						}
 
+						Vector3f pixelColor = fragmentProcessing(fragmentData);
+						intBufferWrapper.setPixel(x, y, pixelColor);
+					}
+				}
+			}
 
 		}
 		
@@ -193,6 +219,7 @@ public class ObjectModel {
 	private Vector3f fragmentProcessing(FragmentData fragmentData) {
 		
 		if (worldModel.displayType == DisplayTypeEnum.FACE_COLOR) {
+			return fragmentData.pixelColor;
 		} else if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {
 		} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_FLAT) {
 		} else if (worldModel.displayType == DisplayTypeEnum.LIGHTING_GOURARD) {
@@ -236,8 +263,13 @@ public class ObjectModel {
 
 
 	static Vector4i calcBoundingBox(Vector3f p1, Vector3f p2, Vector3f p3, int imageWidth, int imageHeight) { 
+		int minX,maxX,minY,maxY;
+		minX = (int) Math.floor(Math.max(Math.min(p1.x, Math.min(p2.x, p3.x)), 0f));
+		maxX = (int) Math.round(Math.min(Math.max(p1.x, Math.max(p2.x, p3.x)), imageWidth-1));
+		minY = (int) Math.floor(Math.max(Math.min(p1.y, Math.min(p2.y, p3.y)), 0f));
+		maxY = (int) Math.round(Math.min(Math.max(p1.y, Math.max(p2.y, p3.y)), imageHeight-1));
 
-		return new Vector4i();
+		return new Vector4i(minX, maxX, minY, maxY);
 
 	}
 
