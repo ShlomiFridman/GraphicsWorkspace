@@ -1,5 +1,8 @@
 package your_code;
 
+//student 1 - Omer Goldstein - 205906258
+//student 2 - Shlomi Fridman - 318187002
+
 import java.io.IOException;
 import java.util.List;
 
@@ -171,15 +174,15 @@ public class ObjectModel {
 		
 
 		if (worldModel.displayType == DisplayTypeEnum.FACE_EDGES) {
-			drawLineDDA(intBufferWrapper,vertex1.pointObjectCoordinates,vertex2.pointObjectCoordinates,1f,1f,1f);
-			drawLineDDA(intBufferWrapper,vertex1.pointObjectCoordinates,vertex3.pointObjectCoordinates,1f,1f,1f);
-			drawLineDDA(intBufferWrapper,vertex2.pointObjectCoordinates,vertex3.pointObjectCoordinates,1f,1f,1f);
+			drawLineDDA(intBufferWrapper,vertex1.pointWindowCoordinates,vertex2.pointWindowCoordinates,1f,1f,1f);
+			drawLineDDA(intBufferWrapper,vertex1.pointWindowCoordinates,vertex3.pointWindowCoordinates,1f,1f,1f);
+			drawLineDDA(intBufferWrapper,vertex2.pointWindowCoordinates,vertex3.pointWindowCoordinates,1f,1f,1f);
 			
 
 		} else {
-			Vector3f p1 = new Vector3f(vertex1.pointObjectCoordinates);
-			Vector3f p2 = new Vector3f(vertex2.pointObjectCoordinates);
-			Vector3f p3 = new Vector3f(vertex3.pointObjectCoordinates);
+			Vector3f p1 = new Vector3f(vertex1.pointWindowCoordinates);
+			Vector3f p2 = new Vector3f(vertex2.pointWindowCoordinates);
+			Vector3f p3 = new Vector3f(vertex3.pointWindowCoordinates);
 			
 			Vector4i boundingBox = calcBoundingBox(p1, p2, p3, imageWidth, imageHeight);
 			BarycentricCoordinates bc = new BarycentricCoordinates(p1, p2, p3);
