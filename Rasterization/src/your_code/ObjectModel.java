@@ -165,14 +165,14 @@ public class ObjectModel {
 				.cross(new Vector3f(vertex3.pointEyeCoordinates).sub(vertex1.pointEyeCoordinates)).normalize();
 
 		if (worldModel.displayType == DisplayTypeEnum.FACE_EDGES) {
-			drawLineDDA(intBufferWrapper, vertex1.pointObjectCoordinates, vertex2.pointObjectCoordinates, 1f, 1f, 1f);
-			drawLineDDA(intBufferWrapper, vertex1.pointObjectCoordinates, vertex3.pointObjectCoordinates, 1f, 1f, 1f);
-			drawLineDDA(intBufferWrapper, vertex2.pointObjectCoordinates, vertex3.pointObjectCoordinates, 1f, 1f, 1f);
+			drawLineDDA(intBufferWrapper, vertex1.pointWindowCoordinates, vertex2.pointWindowCoordinates, 1f, 1f, 1f);
+			drawLineDDA(intBufferWrapper, vertex1.pointWindowCoordinates, vertex3.pointWindowCoordinates, 1f, 1f, 1f);
+			drawLineDDA(intBufferWrapper, vertex2.pointWindowCoordinates, vertex3.pointWindowCoordinates, 1f, 1f, 1f);
 
 		} else {
-			Vector3f p1 = vertex1.pointObjectCoordinates;
-			Vector3f p2 = vertex2.pointObjectCoordinates;
-			Vector3f p3 = vertex3.pointObjectCoordinates;
+			Vector3f p1 = vertex1.pointWindowCoordinates;
+			Vector3f p2 = vertex2.pointWindowCoordinates;
+			Vector3f p3 = vertex3.pointWindowCoordinates;
 
 			Vector4i boundingBox = calcBoundingBox(p1, p2, p3,imageWidth,
 					imageHeight);

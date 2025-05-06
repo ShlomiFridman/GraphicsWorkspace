@@ -1,7 +1,9 @@
 package your_code;
 
 import java.nio.IntBuffer;
+import java.util.Random;
 
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -43,6 +45,9 @@ public class WorldModel {
 	
 	float zBuffer[][];
 	
+	private float currentX = 0f;
+	private float currentY = 0f;	
+	
 	private int counter = 0;
 	
 	ErrorLogger errorLogger;
@@ -72,18 +77,60 @@ public class WorldModel {
 		object1.initTransfomations();
 
 		if (exercise.ordinal() == ExerciseEnum.EX_3_1_Object_transformation___translation.ordinal()) {
+		    float dx = -2 + (float)(Math.random() * 4); // -2 to 2
+		    float dy = -2 + (float)(Math.random() * 4); // -2 to 2
+		    currentX += dx;
+		    currentY += dy;
+		    Matrix4f translationMatrix = new Matrix4f().translate(currentX, currentY, 0f);
+		    object1.setModelM(translationMatrix);
 
 
 		}
 	
 		if (exercise.ordinal() == ExerciseEnum.EX_3_2_Object_transformation___scale.ordinal()) {
-			
-
+		    int period = 40;
+		    float centerX = 300f;
+		    float centerY = 300f;
+		    float minScale = 0.8f;
+		    float maxScale = 1.1f;
+		    int frameInCycle = counter % period;
+		    float scale;
+		    if (frameInCycle < period / 2) {
+		        scale = minScale + (maxScale - minScale) * (frameInCycle / (float)(period / 2));
+		    } else 
+		        scale = maxScale - (maxScale - minScale) * ((frameInCycle - period / 2) / (float)(period / 2));
+		    Matrix4f scaleM = new Matrix4f()
+		    	    .translate(centerX, centerY, 0)
+		    	    .scale(scale)
+		    	    .translate(-centerX, -centerY, 0);
+		    object1.setModelM(scaleM);
 		}
 
 		if (exercise.ordinal() == ExerciseEnum.EX_3_3_Object_transformation___4_objects.ordinal()) {
+			float[][] positions = {
+			        {0f, 0f},
+			        {600f, 0f},
+			        {0f, 600f},
+			        {600f, 600f}
+			    };
 
-			
+			    for (int i = 0; i < positions.length; i++) {
+			        float x = positions[i][0];
+			        float y = positions[i][1];
+
+			        Matrix4f scaleM = new Matrix4f()
+			            .translate(x, y, 0)
+			            .scale(0.5f)
+			            .translate(-x, -y, 0);
+
+			        object1.setModelM(scaleM);
+
+			        if (i < positions.length - 1) {
+			            object1.render(intBufferWrapper);
+			        }
+			    }
+			    
+		    
 		}
 
 
