@@ -26,7 +26,6 @@
     <fullyQualifiedTypeName name="short"/>
     <fullyQualifiedTypeName name="java.lang.Exception"/>
     <fullyQualifiedTypeName name="java.lang.OutOfMemoryError"/>
-    <fullyQualifiedTypeName name="java.util.Random"/>
     <fullyQualifiedTypeName name="java.util.Iterator"/>
     <fullyQualifiedTypeName name="your_code.WorldModel"/>
     <fullyQualifiedTypeName name="your_code.Color"/>
@@ -51,8 +50,6 @@
     <fullyQualifiedTypeName name="org.joml.Vector3fc"/>
     <fullyQualifiedTypeName name="your_code.IntersectionResults"/>
     <fullyQualifiedTypeName name="app_interface.IntBufferWrapper"/>
-    <fullyQualifiedTypeName name="org.joml.Matrix3f"/>
-    <fullyQualifiedTypeName name="org.joml.Vector4f"/>
     <fullyQualifiedTypeName name="app_interface.ModelSphere"/>
     <fullyQualifiedTypeName name="app_interface.SphereTexture"/>
     <fullyQualifiedTypeName name="java.util.Arrays"/>
@@ -60,4 +57,7 @@
     <fullyQualifiedTypeName name="javafx.scene.control.Label"/>
     <fullyQualifiedTypeName name="your_code.ErrorLogger.ErrorType"/>
     <fullyQualifiedTypeName name="org.joml.Vector3f"/>
+    <fullyQualifiedTypeName name="java.util.Random"/>
+    <fullyQualifiedTypeName name="org.joml.Matrix3f"/>
+    <fullyQualifiedTypeName name="org.joml.Vector4f"/>
 </qualifiedTypeNameHistroy>

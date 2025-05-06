@@ -1,3 +1,6 @@
+// student 1 - Omer Goldstein - 205906258
+// student 2 - Shlomi Fridman - 318187002
+
 package your_code;
 
 import java.nio.IntBuffer;
