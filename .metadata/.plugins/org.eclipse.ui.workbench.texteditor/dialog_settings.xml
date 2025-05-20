@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
-		<item key="selection" value="imageWidth"/>
+		<item key="selection" value="rasterization"/>
 		<item key="wrap" value="true"/>
 		<item key="casesensitive" value="false"/>
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
-			<item value="imageWidth"/>
-			<item value="1.1"/>
+			<item value="rasterization"/>
+			<item value="z-"/>
+			<item value="zbuff"/>
+			<item value="zbuffer"/>
+			<item value="if (worldModel.displayType == DisplayTypeEnum. INTERPOlATED_"/>
+			<item value="if (worldModel.displayType == DisplayTypeEnum. INTERPOlATED_VERTEX_COLOR) {"/>
+			<item value="if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {"/>
+			<item value="BarycentricCoordinates"/>
+			<item value="horizontalFOV"/>
+			<item value="if(projectionType==ProjectionTypeEnum.PERSPECTIVE) {"/>
+			<item value="transformNormalFromObjectCoordToEyeCoordAndDrawIt"/>
+			<item value="viewport"/>
 			<item value="render"/>
-			<item value="set"/>
-			<item value="view"/>
-			<item value="port"/>
-			<item value="toString"/>
-			<item value="modelM"/>
-			<item value="int"/>
-			<item value="object1"/>
-			<item value="if (exercise.ordinal() == ExerciseEnum.EX_3_1_Object_transformation___translation.ordinal()) {"/>
-			<item value="if (exercise.ordin"/>
-			<item value="fragmentProcessing"/>
-			<item value="calcBoundingBox"/>
-			<item value="if (worldModel.displayType == DisplayTypeEnum.FACE_EDGES) {"/>
+			<item value="vertexProcessing"/>
+			<item value="imageWidth"/>
 		</list>
 		<list key="replacehistory">
 			<item value="point"/>

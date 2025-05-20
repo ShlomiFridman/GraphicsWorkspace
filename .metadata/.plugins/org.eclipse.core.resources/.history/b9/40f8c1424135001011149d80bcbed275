@@ -203,13 +203,9 @@ public class ObjectModel {
 						} else if (worldModel.displayType == DisplayTypeEnum.TEXTURE) {
 						} else if (worldModel.displayType == DisplayTypeEnum.TEXTURE_LIGHTING) {
 						}
-						
-						float z = bc.interpolate(p1.z,p2.z,p3.z);
-						if (z < worldModel.zBuffer[y][x]) {
-						    worldModel.zBuffer[y][x] = z;
-							Vector3f pixelColor = fragmentProcessing(fragmentData);
-							intBufferWrapper.setPixel(x, y, pixelColor);
-						}
+
+						Vector3f pixelColor = fragmentProcessing(fragmentData);
+						intBufferWrapper.setPixel(x, y, pixelColor);
 					}
 				}
 			}

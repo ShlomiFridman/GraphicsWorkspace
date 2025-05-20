@@ -205,8 +205,7 @@ public class ObjectModel {
 						}
 						
 						float z = bc.interpolate(p1.z,p2.z,p3.z);
-						if (z < worldModel.zBuffer[y][x]) {
-						    worldModel.zBuffer[y][x] = z;
+						if (z > worldModel.zBuffer[y][x]) {
 							Vector3f pixelColor = fragmentProcessing(fragmentData);
 							intBufferWrapper.setPixel(x, y, pixelColor);
 						}

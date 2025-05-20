@@ -150,8 +150,8 @@ public class WorldModel {
 
 			
 			if(projectionType==ProjectionTypeEnum.PERSPECTIVE) {
-				Matrix4f projectionM = new Matrix4f().perspective((float) Math.toRadians(30), 1, 1, 100);
-				object1.setProjectionM(projectionM);
+				Matrix4f projectionM = new Matrix4f().perspective(Math.toRadians(30), 1, 1, 100);
+				object1.setProjectionM(lookAtMatrix);
 
 			}
 			
