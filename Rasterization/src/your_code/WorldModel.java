@@ -138,7 +138,7 @@ public class WorldModel {
 
 
 			if(projectionType==ProjectionTypeEnum.ORTHOGRAPHIC) {
-				Matrix4f orthoProjection = new Matrix4f().ortho(-1.5f, 1.5f, -1.5f, 1.5f, -1f, 1f);
+				Matrix4f orthoProjection = new Matrix4f().ortho(-1.5f, 1.5f, -1.5f, 1.5f, 1f, -1f);
 				object1.setProjectionM(orthoProjection);
 			}
 			Matrix4f viewportMatrix = YoursUtilities.createViewportMatrix(0, 0, imageWidth, imageHeight);

@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
-		<item key="selection" value="rasterization"/>
+		<item key="selection" value="t"/>
 		<item key="wrap" value="true"/>
 		<item key="casesensitive" value="false"/>
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
+			<item value="t"/>
+			<item value="Model.displayType == DisplayTypeEnum.TEXTURE) {"/>
+			<item value="worldModel.displayType == DisplayTypeEnum.TEXTUR"/>
+			<item value="alpha"/>
+			<item value="worldModel.displayType == DisplayTypeEnum.TEXTURE)"/>
+			<item value="dModel.lightPositionWorldCoordin"/>
 			<item value="rasterization"/>
+			<item value="displayType == DisplayTypeEnum. INTERPOlATED"/>
+			<item value="displayType == DisplayTypeEnum.INTERPOlATED"/>
+			<item value="if(projectionType==ProjectionTypeEnum.PERSPECTIVE) {"/>
+			<item value="if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {"/>
+			<item value="or"/>
 			<item value="z-"/>
 			<item value="zbuff"/>
 			<item value="zbuffer"/>
-			<item value="if (worldModel.displayType == DisplayTypeEnum. INTERPOlATED_"/>
-			<item value="if (worldModel.displayType == DisplayTypeEnum. INTERPOlATED_VERTEX_COLOR) {"/>
-			<item value="if (worldModel.displayType == DisplayTypeEnum.INTERPOlATED_VERTEX_COLOR) {"/>
-			<item value="BarycentricCoordinates"/>
-			<item value="horizontalFOV"/>
-			<item value="if(projectionType==ProjectionTypeEnum.PERSPECTIVE) {"/>
-			<item value="transformNormalFromObjectCoordToEyeCoordAndDrawIt"/>
-			<item value="viewport"/>
-			<item value="render"/>
-			<item value="vertexProcessing"/>
-			<item value="imageWidth"/>
 		</list>
 		<list key="replacehistory">
 			<item value="point"/>
